@@ -4,11 +4,10 @@
 (function () {
   'use strict';
 
-  /* ---------- Datos de contacto --------------------------------------
-     TODO: reemplazar por los datos reales de Brandísimas.             */
-  var WHATSAPP = '56900000000';                       // sin +, sin espacios
+  /* ---------- Datos de contacto -------------------------------------- */
+  var WHATSAPP = '56982879392';                       // sin +, sin espacios
   var WA_TEXT  = 'Hola Brandísimas! Quiero cotizar el patch bar para mi evento.';
-  var INSTAGRAM = 'https://www.instagram.com/brandisimas';
+  var INSTAGRAM = 'https://www.instagram.com/brandisimas.cl';
 
   var WA_URL = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(WA_TEXT);
 
