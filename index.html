@@ -1,30 +1,287 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brandisimas</title>
-  <meta name="description" content="Brandisimas — sitio en construcción.">
-  <link rel="icon" href="assets/logo.png">
-  <style>
-    html, body { height: 100%; margin: 0; }
-    body {
-      display: grid;
-      place-items: center;
-      background: #ffffff;
-      padding: 24px;
-      box-sizing: border-box;
-    }
-    .logo-img {
-      display: block;
-      width: min(420px, 80vw);
-      height: auto;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brandísimas — Patch bar móvil para eventos</title>
+<meta name="description" content="Llevamos un patch bar móvil a tu evento: cada invitado personaliza y estampa su prenda en menos de 5 minutos. Cumpleaños, matrimonios, activaciones y ferias.">
+<meta name="theme-color" content="#fe83c4">
+<link rel="icon" href="assets/logo.png">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Brandísimas — Patch bar móvil para eventos">
+<meta property="og:description" content="Tu evento merece un souvenir que sí quieran conservar.">
+<meta property="og:image" content="assets/img/hero-instagram.webp">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <main>
-    <img src="assets/logo.png" alt="Brandisimas" class="logo-img">
-  </main>
+
+<!-- Loader -->
+<div class="loader" id="loader" aria-hidden="true">
+  <img src="assets/logo.png" alt="" class="loader-logo">
+</div>
+
+<!-- Sprite: flor decorativa (una sola definición, se recolorea por CSS) -->
+<svg class="svg-sprite" aria-hidden="true" focusable="false">
+  <symbol id="flor" viewBox="0 0 158 155">
+    <path d="M148.717 94.0866C140.69 86.1182 129.896 81.8144 119.016 79.4282C117.207 79.0447 115.397 78.6825 113.587 78.3629C116.185 76.6797 118.761 74.9753 121.316 73.2495C131.429 66.4103 143.607 59.2089 149.143 47.789C152.294 41.312 153.614 33.5993 150.889 26.6962C147.546 18.2165 140.052 12.4852 130.684 12.8048C117.015 13.3162 105.177 24.0117 97.3634 34.3663C94.553 38.0948 92.2962 42.1216 90.4652 46.3402C89.9542 42.3134 89.4219 38.3079 88.8045 34.3024C86.9522 22.1155 81.4378 9.28935 69.8981 3.36632C63.0212 -0.170447 54.6964 -1.4701 47.5427 2.06667C40.3037 5.64605 38.0469 13.6784 38.5366 21.178C39.3244 33.1519 43.2845 44.5718 49.4163 54.8625C49.5014 55.0117 49.6079 55.1395 49.693 55.2887C49.6079 55.2887 49.5014 55.246 49.4163 55.2247C37.3017 52.6893 23.8884 52.3271 13.0939 59.3368C7.49441 62.9588 2.51233 68.2 0.574855 74.7196C-0.638728 78.8103 -0.127746 83.7959 2.21426 87.3966C4.79046 91.3808 8.55896 93.1918 12.8384 94.7897C22.3129 98.3265 32.4261 100.351 42.518 101.118C37.4082 106.87 33.1074 113.304 30.0841 120.74C28.0614 125.726 26.6562 131.223 27.295 136.656C28.2531 144.752 32.7455 152.635 41.3257 154.531C49.2672 156.278 56.6765 152.678 63.3192 148.651C68.3226 145.604 73.0705 141.982 77.3925 138.041C84.1843 131.862 90.1032 124.405 94.6169 116.351C98.8964 120.442 103.495 124.192 108.52 127.579C119.655 135.079 134.495 141.194 147.12 133.268C153.806 129.071 158 121.997 157.957 114.008C157.894 106.487 153.891 99.2426 148.675 94.0653L148.717 94.0866Z"/>
+  </symbol>
+</svg>
+
+<!-- 1. Navbar -->
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#inicio" aria-label="Brandísimas — inicio">
+      <img src="assets/logo.png" alt="Brandísimas" class="logo-img">
+    </a>
+
+    <nav class="nav-links" id="navLinks" aria-label="Navegación principal">
+      <a href="#inicio">Inicio</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#productos">Productos</a>
+      <a class="btn btn-pink nav-cta-mobile" href="#cotiza" data-wa>Cotiza tu evento</a>
+    </nav>
+
+    <a class="btn btn-pink nav-cta" href="#cotiza" data-wa>Cotiza tu evento</a>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- 2. Hero -->
+  <section class="hero" id="inicio">
+    <svg class="flor flor-amber hero-flor" aria-hidden="true"><use href="#flor"/></svg>
+
+    <div class="container hero-inner">
+      <div class="hero-media">
+        <img src="assets/img/hero-instagram.webp" alt="Stand de Brandísimas montado en un evento al aire libre" width="1100" height="1196" decoding="async">
+      </div>
+
+      <div class="hero-copy">
+        <h1>Tu evento merece un souvenir que sí quieran conservar</h1>
+        <p class="hero-lead">Llevamos un Patch bar móvil donde cada invitado personaliza y estampa su prenda en menos de 5 minutos</p>
+        <div class="hero-actions">
+          <a class="btn btn-amber" href="#cotiza" data-wa>Cotiza tu evento</a>
+          <a class="btn btn-ghost" href="#como-funciona">Ver cómo funciona</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Cómo funciona -->
+  <section class="steps" id="como-funciona">
+    <div class="container">
+      <h2 class="banner">¿Cómo funciona?</h2>
+
+      <ol class="steps-grid">
+        <li class="step">
+          <div class="step-media">
+            <img src="assets/img/paso-1-eligen.webp" alt="Invitada eligiendo parches en la mesa de estampados" width="900" height="600" loading="lazy" decoding="async">
+            <img class="step-num" src="assets/img/num-1.png" alt="Paso 1" width="138" height="115" loading="lazy">
+          </div>
+          <h3>Eligen</h3>
+          <p>Diseñamos en base a tu temática o línea gráfica los estampados</p>
+        </li>
+
+        <li class="step">
+          <div class="step-media">
+            <img src="assets/img/paso-2-estampamos.webp" alt="Estampado de una prenda en vivo durante el evento" width="900" height="600" loading="lazy" decoding="async">
+            <img class="step-num" src="assets/img/num-2.png" alt="Paso 2" width="138" height="115" loading="lazy">
+          </div>
+          <h3>Estampamos</h3>
+          <p>En menos de 5 minutos, en vivo</p>
+        </li>
+
+        <li class="step">
+          <div class="step-media">
+            <img src="assets/img/paso-3-sellollevan.webp" alt="Invitada mostrando su tote bag personalizado" width="900" height="600" loading="lazy" decoding="async">
+            <img class="step-num" src="assets/img/num-3.png" alt="Paso 3" width="138" height="115" loading="lazy">
+          </div>
+          <h3>Se lo llevan</h3>
+          <p>Un recuerdo único creado por ellos.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 4. Servicios -->
+  <section class="services" id="servicios">
+    <div class="container">
+      <h2 class="banner">Nuestros servicios</h2>
+
+      <div class="services-grid">
+
+        <article class="service">
+          <div class="service-photo">
+            <img src="assets/img/celebraciones.webp" alt="Invitadas en una celebración junto al stand de Brandísimas" width="820" height="547" loading="lazy" decoding="async">
+            <svg class="flor flor-pink service-flor-a" aria-hidden="true"><use href="#flor"/></svg>
+          </div>
+
+          <div class="service-body">
+            <h3>Celebraciones</h3>
+            <div class="service-card service-card--pink">
+              <ul class="pill-list">
+                <li>Cumpleaños</li>
+                <li>Matrimonios</li>
+                <li>Baby Shower</li>
+                <li>Graduaciones</li>
+              </ul>
+              <p>Incluye stand, montaje, personal y una selección de productos según la cantidad de invitados.</p>
+              <a class="btn btn-amber" href="#cotiza" data-wa>Cotiza tu celebración</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="service">
+          <div class="service-photo">
+            <img src="assets/img/empresas.webp" alt="Activación de marca con el patch bar de Brandísimas en un evento corporativo" width="820" height="547" loading="lazy" decoding="async">
+            <svg class="flor flor-amber service-flor-b" aria-hidden="true"><use href="#flor"/></svg>
+          </div>
+
+          <div class="service-body">
+            <h3>Empresas</h3>
+            <div class="service-card service-card--cream">
+              <ul class="pill-list">
+                <li>Activaciones</li>
+                <li>Lanzamientos</li>
+                <li>Ferias, eventos</li>
+                <li>Team building</li>
+              </ul>
+              <p>Adaptamos el volumen de productos y branding al tamaño del evento.</p>
+              <a class="btn btn-amber" href="#cotiza" data-wa>Cotiza tu evento</a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. La barra creativa -->
+  <section class="barra">
+    <div class="container">
+      <div class="barra-box">
+        <svg class="flor flor-amber barra-flor" aria-hidden="true"><use href="#flor"/></svg>
+
+        <div class="barra-copy">
+          <h2>La barra creativa</h2>
+          <img src="assets/logo.png" alt="Brandísimas" class="barra-logo logo-img">
+          <p>Un espacio pensado para convertir cualquier evento en una experiencia única.</p>
+          <a class="btn btn-amber" href="https://www.instagram.com/brandisimas" target="_blank" rel="noopener" data-ig>Ver en instagram</a>
+        </div>
+
+        <div class="barra-photo">
+          <img src="assets/img/barra-creativa.webp" alt="Stand rosado de Brandísimas montado en un jardín" width="900" height="600" loading="lazy" decoding="async">
+        </div>
+
+        <ul class="barra-pills">
+          <li>Mesa de estampados</li>
+          <li>Selección de estampados</li>
+          <li>Estación de estampados</li>
+          <li>Exhibición de productos</li>
+          <li>Personal especializado</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Productos -->
+  <section class="products" id="productos">
+    <div class="container">
+      <h2 class="banner">¿Qué pueden personalizar?</h2>
+      <svg class="flor flor-amber products-flor-a" aria-hidden="true"><use href="#flor"/></svg>
+      <svg class="flor flor-pink products-flor-b" aria-hidden="true"><use href="#flor"/></svg>
+
+      <div class="carousel">
+        <button class="carousel-btn carousel-prev" id="prodPrev" aria-label="Producto anterior" aria-controls="prodTrack">
+          <svg viewBox="0 0 38.8793 59.0002" aria-hidden="true"><path d="M33.8791 5.00016L7.37909 26.5002L33.8791 54.0002" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg>
+        </button>
+
+        <ul class="carousel-track" id="prodTrack" tabindex="0" aria-label="Productos personalizables">
+          <li class="product">
+            <h3>Tote<br>bags</h3>
+            <img src="assets/img/prod-tote-bag.webp" alt="Tote bag de algodón crudo" width="900" height="1187" loading="lazy" decoding="async">
+          </li>
+          <li class="product">
+            <h3>Bucket hat</h3>
+            <img src="assets/img/prod-bucket-hat.webp" alt="Bucket hat color crudo" width="900" height="750" loading="lazy" decoding="async">
+          </li>
+          <li class="product">
+            <h3>Vasos</h3>
+            <img src="assets/img/prod-vasos.webp" alt="Vaso de vidrio con tapa de bambú y bombilla" width="900" height="1187" loading="lazy" decoding="async">
+          </li>
+          <li class="product">
+            <h3>Poleras</h3>
+            <img src="assets/img/prod-poleras.webp" alt="Polera oversize color crudo" width="900" height="1187" loading="lazy" decoding="async">
+          </li>
+        </ul>
+
+        <button class="carousel-btn carousel-next" id="prodNext" aria-label="Producto siguiente" aria-controls="prodTrack">
+          <svg viewBox="0 0 38.8793 59.0002" aria-hidden="true"><path d="M33.8791 5.00016L7.37909 26.5002L33.8791 54.0002" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. CTA final -->
+  <section class="cta-final" id="cotiza">
+    <div class="wave" aria-hidden="true">
+      <svg viewBox="0 0 1611.02 110" preserveAspectRatio="none">
+        <path d="M0 110L0 15.5477C40.4404 4.52486 82.9042 2.5619 124.976 12.6485C174.356 24.5019 215.355 54.6863 260.476 76.0978C267.68 78.6798 275.003 80.8391 282.478 82.485C289.938 82.8776 297.398 82.8021 304.843 82.2887C329.714 77.4567 353.649 68.865 377.101 59.2766C404.66 47.3931 432.038 35.0415 460.051 24.2452C517.978 1.9126 579.892 -7.25296 641.111 6.44253C698.283 19.232 745.217 55.094 797.255 79.6613C809.789 84.2365 822.609 87.7699 835.717 90.2764C849.64 91.4089 863.593 91.3938 877.516 90.2613C890.669 87.785 903.566 84.312 916.16 79.7972C941.529 67.0681 963.547 49.4467 988.176 35.1925C1027.65 12.3314 1074.36 -0.246663 1120.08 4.93256C1143.44 7.57502 1165.99 11.0782 1188.2 18.7639C1210.64 26.5403 1232.62 36.1589 1253.88 46.7287C1280.67 60.0467 1306.38 75.3579 1333.5 87.9662C1345.03 92.3149 1356.75 95.9238 1368.78 98.4454C1374.28 98.7323 1379.76 98.7474 1385.26 98.4907C1395.19 96.3315 1404.89 93.3417 1414.43 89.7933C1461.73 67.8684 1505.52 38.303 1556.58 25.0303C1572.84 20.8024 1589.15 18.0845 1605.52 16.9822L1611.02 110Z" fill="#fe83c4"/>
+      </svg>
+    </div>
+
+    <svg class="flor flor-amber cta-flor-top" aria-hidden="true"><use href="#flor"/></svg>
+
+    <div class="container cta-inner">
+      <svg class="flor flor-amber cta-flor" aria-hidden="true"><use href="#flor"/></svg>
+
+      <div class="cta-copy">
+        <p class="slogan">Se ve,<br>Se vive,<br>Se estampa.</p>
+        <p class="cta-lead">Haz que tus invitados vivan la experiencia de estampar su propia pieza y se lleven algo que realmente quieran conservar.</p>
+      </div>
+
+      <a class="btn btn-amber cta-btn" href="#" data-wa>Cotiza tu evento</a>
+    </div>
+  </section>
+
+</main>
+
+<!-- 8. Footer -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <img src="assets/logo.png" alt="Brandísimas" class="footer-logo logo-img">
+    <nav class="footer-links" aria-label="Enlaces del pie">
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#productos">Productos</a>
+      <a href="https://www.instagram.com/brandisimas" target="_blank" rel="noopener" data-ig>Instagram</a>
+    </nav>
+    <p class="footer-copy">© <span id="year">2026</span> Brandísimas · Patch bar móvil</p>
+  </div>
+</footer>
+
+<!-- 9. WhatsApp flotante -->
+<a class="wa-float" href="#" data-wa aria-label="Escríbenos por WhatsApp">
+  <span class="wa-ring" aria-hidden="true"></span>
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path fill="currentColor" d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.79-1.47-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.38-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35M12.04 21.5h-.01a9.45 9.45 0 0 1-4.8-1.32l-.35-.2-3.57.94.95-3.48-.22-.36a9.42 9.42 0 0 1-1.45-5.04c0-5.2 4.25-9.44 9.47-9.44a9.4 9.4 0 0 1 6.69 2.77 9.35 9.35 0 0 1 2.77 6.68c0 5.2-4.25 9.45-9.48 9.45M20.5 3.49A11.8 11.8 0 0 0 12.04 0C5.5 0 .2 5.3.2 11.81c0 2.08.55 4.11 1.58 5.9L.1 24l6.45-1.69a11.9 11.9 0 0 0 5.49 1.39h.01c6.53 0 11.84-5.3 11.84-11.81 0-3.16-1.24-6.13-3.48-8.36"/>
+  </svg>
+</a>
+
+<script src="js/main.js"></script>
 </body>
 </html>
