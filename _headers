@@ -1,0 +1,13 @@
+# Cloudflare Pages — política de caché
+# El sitio se itera seguido: css/js deben revalidar en cada visita,
+# si no el navegador sirve la versión vieja hasta 4 horas (default).
+
+/css/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Las imágenes sí se cachean: cambian poco y pesan.
+/assets/*
+  Cache-Control: public, max-age=86400
