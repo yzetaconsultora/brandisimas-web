@@ -67,38 +67,96 @@
     });
   }
 
-  /* ---------- Carrusel de productos ----------------------------------- */
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Carrusel infinito de productos --------------------------
+     Se clona el set completo a cada lado y se salta el scroll un set
+     entero al llegar a un borde. El salto es instantáneo, así que la
+     costura no se ve y las flechas nunca se topan con un extremo.     */
   var track = document.getElementById('prodTrack');
   var prev  = document.getElementById('prodPrev');
   var next  = document.getElementById('prodNext');
 
   if (track && prev && next) {
-    function step() {
-      var first = track.querySelector('.product');
-      if (!first) return track.clientWidth;
+    var originals = Array.prototype.slice.call(track.children);
+    var setLen = originals.length;
+
+    // Un set antes y otro después de los originales.
+    var before = document.createDocumentFragment();
+    var after  = document.createDocumentFragment();
+    originals.forEach(function (li) {
+      var a = li.cloneNode(true);
+      var b = li.cloneNode(true);
+      [a, b].forEach(function (c) {
+        c.setAttribute('data-clone', '');
+        c.setAttribute('aria-hidden', 'true');
+        c.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
+      });
+      before.appendChild(a);
+      after.appendChild(b);
+    });
+    track.insertBefore(before, track.firstChild);
+    track.appendChild(after);
+
+    var setWidth = 0;
+
+    function measure() {
+      var items = track.children;
+      if (!items.length) return 0;
       var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-      return first.getBoundingClientRect().width + gap;
+      var w = items[0].getBoundingClientRect().width + gap;
+      setWidth = w * setLen;
+      return w;
     }
 
-    function syncArrows() {
-      var max = track.scrollWidth - track.clientWidth - 2;
-      prev.disabled = track.scrollLeft <= 2;
-      next.disabled = track.scrollLeft >= max;
+    function jump(delta) {
+      var prevBehavior = track.style.scrollBehavior;
+      track.style.scrollBehavior = 'auto';
+      track.scrollLeft += delta;
+      // forzar reflow para que el navegador aplique el salto sin animar
+      void track.offsetWidth;
+      track.style.scrollBehavior = prevBehavior;
     }
 
-    prev.addEventListener('click', function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); });
-    next.addEventListener('click', function () { track.scrollBy({ left:  step(), behavior: 'smooth' }); });
+    function recenter() {
+      if (!setWidth) return;
+      if (track.scrollLeft < setWidth * 0.5) jump(setWidth);
+      else if (track.scrollLeft > setWidth * 1.5) jump(-setWidth);
+    }
 
-    track.addEventListener('scroll', syncArrows, { passive: true });
-    window.addEventListener('resize', syncArrows);
-    syncArrows();
+    function reset() {
+      measure();
+      jump(setWidth - track.scrollLeft);
+    }
+
+    /* El recentrado nunca interrumpe una animación en curso:
+       con arrastre manual se hace al quedar quieto, y con las flechas
+       justo ANTES de animar. Si se hiciera durante el scroll suave, el
+       salto se come el avance del click en la costura. */
+    var idle;
+    track.addEventListener('scroll', function () {
+      clearTimeout(idle);
+      idle = setTimeout(recenter, 140);
+    }, { passive: true });
+
+    function move(dir) {
+      var itemWidth = measure();
+      recenter();
+      track.scrollBy({ left: dir * itemWidth, behavior: reduced ? 'auto' : 'smooth' });
+    }
+
+    prev.addEventListener('click', function () { move(-1); });
+    next.addEventListener('click', function () { move(1); });
+
+    window.addEventListener('resize', reset);
+    reset();
+    // Las imágenes cambian el layout al cargar; recentrar cuando terminen.
+    window.addEventListener('load', reset);
   }
 
   /* ---------- GSAP ----------------------------------------------------
-     Solo posición y escala. Nunca opacity: si GSAP no carga, todo
-     el contenido ya es visible por CSS.                                */
-  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+     Solo posición, escala y rotación. Nunca opacity: si GSAP no carga,
+     todo el contenido ya es visible por CSS.                           */
   if (window.gsap && window.ScrollTrigger && !reduced) {
     gsap.registerPlugin(ScrollTrigger);
 
@@ -136,7 +194,8 @@
       scrollTrigger: { trigger: '.barra-pills', start: 'top 85%' }
     });
 
-    gsap.from('.product', {
+    // Solo los originales: los clones del carrusel ya entran colocados.
+    gsap.from('.product:not([data-clone])', {
       y: 40, duration: 0.7, ease: 'power3.out', stagger: 0.09,
       scrollTrigger: { trigger: '.carousel', start: 'top 85%' }
     });
@@ -146,7 +205,7 @@
       scrollTrigger: { trigger: '.cta-final', start: 'top 80%' }
     });
 
-    /* Flores: giro lento ligado al scroll */
+    /* --- Flores: giro lento ligado al scroll (sobre el contenedor) --- */
     document.querySelectorAll('.flor').forEach(function (el, i) {
       gsap.to(el, {
         rotation: i % 2 === 0 ? 70 : -70,
@@ -154,5 +213,54 @@
         scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 1.2 }
       });
     });
+
+    /* --- Easter egg: click en una flor = vuelta completa -------------
+       Gira la marca interna, no el contenedor, para no pelear con el
+       scrub de arriba.                                               */
+    document.querySelectorAll('.flor-mark').forEach(function (mark) {
+      mark.addEventListener('click', function () {
+        if (gsap.isTweening(mark)) return;          // ignora el doble click
+        gsap.fromTo(mark,
+          { rotation: 0, scale: 1 },
+          { rotation: 360, scale: 1.12, duration: 0.5, ease: 'power2.in',
+            onComplete: function () {
+              gsap.to(mark, { scale: 1, duration: 0.45, ease: 'elastic.out(1, 0.45)' });
+              gsap.set(mark, { rotation: 0 });
+            }
+          });
+      });
+    });
+
+    /* --- Tilt con parallax de mouse en las imágenes ------------------
+       Excluye el carrusel a propósito: ahí el movimiento compite con
+       el scroll horizontal.                                          */
+    var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    if (finePointer) {
+      document.querySelectorAll('[data-tilt]').forEach(function (img) {
+        var zone = img.parentElement;
+        var MAX = 9;      // grados
+        var LIFT = 10;    // px que "flota"
+
+        var rx = gsap.quickTo(img, 'rotationX', { duration: 0.5, ease: 'power2.out' });
+        var ry = gsap.quickTo(img, 'rotationY', { duration: 0.5, ease: 'power2.out' });
+        var ty = gsap.quickTo(img, 'y',         { duration: 0.5, ease: 'power2.out' });
+        var sc = gsap.quickTo(img, 'scale',     { duration: 0.5, ease: 'power2.out' });
+
+        zone.addEventListener('mousemove', function (e) {
+          var b = zone.getBoundingClientRect();
+          var px = (e.clientX - b.left) / b.width  - 0.5;   // -0.5 .. 0.5
+          var py = (e.clientY - b.top)  / b.height - 0.5;
+          rx(-py * MAX * 2);
+          ry(px * MAX * 2);
+          ty(-LIFT);
+          sc(1.03);
+        });
+
+        zone.addEventListener('mouseleave', function () {
+          rx(0); ry(0); ty(0); sc(1);
+        });
+      });
+    }
   }
 })();
