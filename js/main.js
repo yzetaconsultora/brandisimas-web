@@ -235,6 +235,11 @@
         .to(mark, { y: 0, duration: 0.36, ease: 'bounce.out' }, '>-0.04')
         .to(mark, { scale: 1, duration: 0.42, ease: 'elastic.out(1, 0.4)' }, '<');
 
+      /* Único pomo de velocidad: <1 la enlentece, >1 la acelera.
+         Se toca esto y no las duraciones, así la coreografía
+         (impulso, vuelta, salto, aterrizaje) mantiene sus proporciones. */
+      tl.timeScale(0.58);
+
       mark.addEventListener('click', function () {
         if (tl.isActive()) return;
         tl.restart();
