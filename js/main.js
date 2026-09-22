@@ -218,16 +218,26 @@
        Gira la marca interna, no el contenedor, para no pelear con el
        scrub de arriba.                                               */
     document.querySelectorAll('.flor-mark').forEach(function (mark) {
+      /* Una sola vuelta, con timing de dibujo animado: toma impulso
+         hacia atrás, gira una vez, salta y aterriza temblando. Va en
+         una timeline pausada para que un click no pise al anterior. */
+      var tl = gsap.timeline({
+        paused: true,
+        onComplete: function () { gsap.set(mark, { rotation: 0, scale: 1, y: 0 }); }
+      });
+
+      tl.fromTo(mark,
+          { rotation: 0, scale: 1, y: 0 },
+          { rotation: -30, scale: 0.84, duration: 0.15, ease: 'power2.out' })
+        .to(mark, { rotation: 360, duration: 0.62, ease: 'back.out(1.5)' })
+        .to(mark, { y: -16, duration: 0.26, ease: 'power2.out' }, '<')
+        .to(mark, { scale: 1.2, duration: 0.2, ease: 'power2.out' }, '<')
+        .to(mark, { y: 0, duration: 0.36, ease: 'bounce.out' }, '>-0.04')
+        .to(mark, { scale: 1, duration: 0.42, ease: 'elastic.out(1, 0.4)' }, '<');
+
       mark.addEventListener('click', function () {
-        if (gsap.isTweening(mark)) return;          // ignora el doble click
-        gsap.fromTo(mark,
-          { rotation: 0, scale: 1 },
-          { rotation: 360, scale: 1.12, duration: 0.5, ease: 'power2.in',
-            onComplete: function () {
-              gsap.to(mark, { scale: 1, duration: 0.45, ease: 'elastic.out(1, 0.45)' });
-              gsap.set(mark, { rotation: 0 });
-            }
-          });
+        if (tl.isActive()) return;
+        tl.restart();
       });
     });
 
