@@ -20,10 +20,14 @@
 
   --font: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --maxw: 1500px;
+  --maxw: 1680px;
   --gutter: clamp(20px, 4vw, 50px);
 
   --nav-h: 96px;
+
+  /* Alto útil bajo la navbar sticky. svh evita el salto de las barras
+     dinámicas del navegador móvil. */
+  --sec-min: calc(100svh - var(--nav-h));
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -39,7 +43,10 @@ body {
   overflow-x: hidden;
 }
 
-img { max-width: 100%; display: block; }
+/* height:auto es necesario: sin él, el atributo height="600" del HTML
+   gana como hint de presentación, la altura queda definida y el
+   navegador ignora todos los aspect-ratio de más abajo. */
+img { max-width: 100%; display: block; height: auto; }
 
 a { color: inherit; text-decoration: none; cursor: pointer; }
 
@@ -121,14 +128,26 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 /* ---------- Flor decorativa ---------------------------------------- */
 .flor {
   position: absolute;
+  display: block;
   width: 100px;
   aspect-ratio: 158 / 155;
-  pointer-events: none;
+  pointer-events: none;   /* el contenedor no intercepta clicks */
   z-index: 2;
 }
 .flor-amber { color: var(--amber); }
 .flor-pink  { color: var(--pink); }
-.flor use, .flor path { fill: currentColor; }
+
+/* La marca sí es clickeable: easter egg de giro completo */
+.flor-mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: filter 0.25s ease;
+}
+.flor-mark:hover { filter: brightness(1.08) saturate(1.12); }
+.flor-mark use, .flor-mark path { fill: currentColor; }
 
 /* ---------- Franja de título --------------------------------------- */
 .banner {
@@ -524,7 +543,7 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 .carousel-next svg { transform: rotate(180deg); }
 .carousel-btn:hover { transform: scale(1.15); }
 .carousel-btn:focus-visible { outline: 3px solid var(--pink); outline-offset: 4px; border-radius: 8px; }
-.carousel-btn[disabled] { opacity: 0.3; pointer-events: none; }
+.carousel-btn:active { transform: scale(0.94); }
 
 .carousel-track {
   flex: 1 1 auto;
@@ -549,13 +568,17 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
   overflow: hidden;
   background: var(--white);
   aspect-ratio: 452 / 481;
-  display: grid;
-  place-items: center;
 }
+/* Posición absoluta en vez de height:100% dentro de un grid centrado:
+   así object-fit resuelve contra la caja real y no recorta las piezas
+   verticales (tote, vaso, polera medían 535px en una caja de 432). */
 .product img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  padding: clamp(8px, 1.1vw, 18px);
 }
 .product h3 {
   position: absolute;
@@ -677,6 +700,28 @@ button { font: inherit; cursor: pointer; border: 0; background: none; color: inh
 @keyframes ring-pulse {
   0%, 100% { transform: scale(1);   opacity: 0.4; }
   50%      { transform: scale(1.4); opacity: 0; }
+}
+
+/* ---------- Tilt / flotación de imágenes ----------------------------
+   La perspectiva vive en el contenedor; el JS rota la imagen.        */
+.hero-media, .step-media, .service-photo, .barra-photo { perspective: 1000px; }
+[data-tilt] { will-change: transform; }
+
+/* ---------- Secciones a pantalla completa ---------------------------
+   Solo en escritorio: en móvil el contenido ya supera el viewport y
+   estirarlo dejaría huecos enormes. min-height nunca recorta.        */
+@media (min-width: 1025px) {
+  .hero, .steps, .services, .barra, .products {
+    min-height: var(--sec-min);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .hero > .container,
+  .steps > .container,
+  .services > .container,
+  .barra > .container,
+  .products > .container { width: 100%; }
 }
 
 /* ============================================================
