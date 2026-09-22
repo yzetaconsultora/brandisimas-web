@@ -218,25 +218,25 @@
        Gira la marca interna, no el contenedor, para no pelear con el
        scrub de arriba.                                               */
     document.querySelectorAll('.flor-mark').forEach(function (mark) {
-      /* Una sola vuelta: toma impulso hacia atrás, gira una vez y
-         se estira al hacerlo. Va en una timeline pausada para que un
-         click no pise al anterior. */
+      /* Una sola vuelta: toma impulso hacia atrás y gira una vez.
+         Va en una timeline pausada para que un click no pise al
+         anterior. */
       var tl = gsap.timeline({
         paused: true,
-        onComplete: function () { gsap.set(mark, { rotation: 0, scale: 1 }); }
+        onComplete: function () { gsap.set(mark, { rotation: 0 }); }
       });
 
+      /* Solo rotación. Nada de escala ni de back/elastic: el pulso de
+         tamaño y el sobregiro a 391° se leían como un salto. */
       tl.fromTo(mark,
-          { rotation: 0, scale: 1 },
-          { rotation: -30, scale: 0.84, duration: 0.15, ease: 'power2.out' })
-        .to(mark, { rotation: 360, duration: 0.62, ease: 'back.out(1.5)' })
-        .to(mark, { scale: 1.2, duration: 0.2, ease: 'power2.out' }, '<')
-        .to(mark, { scale: 1, duration: 0.42, ease: 'elastic.out(1, 0.4)' }, '>');
+          { rotation: 0 },
+          { rotation: -24, duration: 0.22, ease: 'power2.out' })
+        .to(mark, { rotation: 360, duration: 1.08, ease: 'power2.inOut' });
 
       /* Único pomo de velocidad: <1 la enlentece, >1 la acelera.
          Se toca esto y no las duraciones, así la coreografía
          (impulso, vuelta, salto, aterrizaje) mantiene sus proporciones. */
-      tl.timeScale(0.58);
+      tl.timeScale(1);
 
       mark.addEventListener('click', function () {
         if (tl.isActive()) return;
