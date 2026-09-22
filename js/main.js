@@ -226,12 +226,12 @@
         onComplete: function () { gsap.set(mark, { rotation: 0 }); }
       });
 
-      /* Solo rotación. Nada de escala ni de back/elastic: el pulso de
-         tamaño y el sobregiro a 391° se leían como un salto. */
+      /* Solo rotación, y arranca en el click: sin impulso previo, sin
+         escala y sin sobregiro. power2.out sale a velocidad de
+         inmediato y frena al llegar. */
       tl.fromTo(mark,
           { rotation: 0 },
-          { rotation: -24, duration: 0.22, ease: 'power2.out' })
-        .to(mark, { rotation: 360, duration: 1.08, ease: 'power2.inOut' });
+          { rotation: 360, duration: 1.45, ease: 'power2.out' });
 
       /* Único pomo de velocidad: <1 la enlentece, >1 la acelera.
          Se toca esto y no las duraciones, así la coreografía
