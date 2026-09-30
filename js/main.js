@@ -139,24 +139,28 @@
     var avail = window.innerHeight - (nav ? nav.offsetHeight : 0) -
                 parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
     var r = box.getBoundingClientRect();
-    if (r.height <= avail) return;
-
-    var base = r.width;
     var minZ = parseFloat(box.getAttribute('data-fit-min')) || FIT_MIN;
 
     /* data-fit-keep-width: escala pura, la sección se ve igual que a
-       tamaño completo, solo más chica (Servicios, a pedido del cliente). */
+       tamaño completo, solo más chica (Servicios, a pedido del cliente).
+       Su ancho lo fija el CSS, así que también debe caber a lo ancho. */
     if (box.hasAttribute('data-fit-keep-width')) {
-      box.style.maxWidth = base + 'px';
-      var kz = Math.max(minZ, avail / r.height);
+      var roomW = sec.clientWidth;
+      if (r.height <= avail && r.width <= roomW) return;
+      var kz = Math.max(minZ, Math.min(1, avail / r.height, roomW / r.width));
       box.style.zoom = kz;
-      // el redondeo del zoom puede dejarla unos px más alta que la pantalla
-      while (kz > minZ && box.getBoundingClientRect().height > avail) {
+      // el redondeo del zoom puede dejarla unos px más grande que el espacio
+      var kr = box.getBoundingClientRect();
+      while (kz > minZ && (kr.height > avail || kr.width > roomW)) {
         kz -= 0.002;
         box.style.zoom = kz;
+        kr = box.getBoundingClientRect();
       }
       return;
     }
+
+    if (r.height <= avail) return;
+    var base = r.width;
 
     var wideMax = Math.max(base, Math.min(sec.clientWidth, FIT_WIDE));
 
