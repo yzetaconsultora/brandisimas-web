@@ -118,6 +118,76 @@
     window.addEventListener('resize', function () { framed.forEach(applyFrame); });
   }
 
+  /* ---------- Ajuste a una pantalla -----------------------------------
+     En escritorio cada sección debe caber en la ventana (el imán de
+     scroll la remata ahí). Si el contenido [data-fit] es más alto que el
+     espacio útil, se reduce con zoom; a la vez se le da más ancho, que
+     acorta los textos, así la reducción es la mínima necesaria.
+     Sin JS o en móvil queda el alto natural.                           */
+  var fitMq = window.matchMedia('(min-width: 1024px) and (min-height: 600px)');
+  var fitBoxes = Array.prototype.slice.call(document.querySelectorAll('[data-fit]'));
+  var FIT_MIN = 0.55;      // bajo esto se prefiere dejar la sección más alta
+  var FIT_WIDE = 1440;     // ancho máximo en pantalla cuando hay zoom
+
+  function fitBox(box) {
+    box.style.zoom = '';
+    box.style.maxWidth = '';
+    if (!fitMq.matches) return;
+
+    var sec = box.closest('section');
+    var cs = getComputedStyle(sec);
+    var avail = window.innerHeight - (nav ? nav.offsetHeight : 0) -
+                parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    var r = box.getBoundingClientRect();
+    if (r.height <= avail) return;
+
+    var base = r.width;
+    var wideMax = Math.max(base, Math.min(sec.clientWidth, FIT_WIDE));
+
+    /* Dos estrategias y gana la que deja el zoom más alto: ensanchar
+       ayuda donde manda el texto (Servicios) y perjudica donde mandan
+       fotos con proporción fija (Cómo funciona), que crecen en alto. */
+    function solve(wide) {
+      var z = 1, h = r.height;
+
+      function apply(v) {
+        z = Math.max(FIT_MIN, Math.min(1, v));
+        box.style.zoom = z;
+        // max-width va en px del elemento: el ancho en pantalla es max-width × zoom
+        box.style.maxWidth = (Math.min(wide, base / z) / z) + 'px';
+        h = box.getBoundingClientRect().height;
+      }
+
+      for (var i = 0; i < 10; i++) {
+        apply(z * avail / h);
+        if (h <= avail && h > avail - 6) break;
+      }
+      while (h > avail && z > FIT_MIN) apply(z - 0.01);
+      // Y lo más grande posible: subir de a poco mientras siga cabiendo.
+      while (z < 1) {
+        var fits = z;
+        apply(z + 0.01);
+        if (h > avail) { apply(fits); break; }
+      }
+      return z;
+    }
+
+    var zNarrow = solve(base);
+    if (wideMax > base && solve(wideMax) < zNarrow) solve(base);
+  }
+
+  function fitAll() { fitBoxes.forEach(fitBox); }
+
+  var fitTimer;
+  function fitLater() { clearTimeout(fitTimer); fitTimer = setTimeout(fitAll, 120); }
+
+  if (fitBoxes.length) {
+    fitAll();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
+    window.addEventListener('load', fitAll);
+    window.addEventListener('resize', fitLater);
+  }
+
   /* ---------- Carrusel infinito de productos --------------------------
      Se clona el set completo a cada lado y se salta el scroll un set
      entero al llegar a un borde. El salto es instantáneo, así que la
