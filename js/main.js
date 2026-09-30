@@ -9,10 +9,12 @@
   var WA_TEXT  = 'Hola Brandísimas! Quiero cotizar el patch bar para mi evento.';
   var INSTAGRAM = 'https://www.instagram.com/brandisimas.cl';
 
-  var WA_URL = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(WA_TEXT);
+  function waUrl(text) {
+    return 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(text);
+  }
 
   document.querySelectorAll('[data-wa]').forEach(function (el) {
-    el.href = WA_URL;
+    el.href = waUrl(WA_TEXT);
     el.target = '_blank';
     el.rel = 'noopener';
   });
@@ -68,6 +70,53 @@
   }
 
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Encuadre de fotos ---------------------------------------
+     data-frame="escala x y" replica el recorte definido en el diseño:
+     la foto cubre su marco, se amplía por `escala` y su centro se
+     desplaza x/y (en % del marco). Sin JS queda en cover centrado.    */
+  var framed = Array.prototype.slice.call(document.querySelectorAll('img[data-frame]'));
+
+  function applyFrame(img) {
+    var box = img.parentElement;
+    var fw = box.clientWidth, fh = box.clientHeight;
+    var iw = img.naturalWidth, ih = img.naturalHeight;
+    if (!fw || !fh || !iw || !ih) return;
+
+    var v = img.getAttribute('data-frame').split(/\s+/).map(parseFloat);
+    var s = v[0] || 1, x = v[1] || 0, y = v[2] || 0;
+    var k = Math.max(fw / iw, fh / ih) * s;
+    var w = iw * k, h = ih * k;
+
+    // La foto nunca debe dejar un borde del marco al descubierto.
+    var mx = Math.max(0, (w / fw - 1) * 50);
+    var my = Math.max(0, (h / fh - 1) * 50);
+    x = Math.max(-mx, Math.min(mx, x));
+    y = Math.max(-my, Math.min(my, y));
+
+    img.style.width  = (w / fw * 100) + '%';
+    img.style.height = (h / fh * 100) + '%';
+    img.style.left   = (50 + x) + '%';
+    img.style.top    = (50 + y) + '%';
+  }
+
+  framed.forEach(function (img) {
+    if (img.complete && img.naturalWidth) applyFrame(img);
+    img.addEventListener('load', function () { applyFrame(img); });
+  });
+
+  if (framed.length && 'ResizeObserver' in window) {
+    // El recorte depende de la proporción del marco, que cambia con el ancho.
+    var ro = new ResizeObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var img = entry.target.querySelector('img[data-frame]');
+        if (img) applyFrame(img);
+      });
+    });
+    framed.forEach(function (img) { ro.observe(img.parentElement); });
+  } else {
+    window.addEventListener('resize', function () { framed.forEach(applyFrame); });
+  }
 
   /* ---------- Carrusel infinito de productos --------------------------
      Se clona el set completo a cada lado y se salta el scroll un set
@@ -154,95 +203,138 @@
     window.addEventListener('load', reset);
   }
 
+  /* ---------- Formulario de cotización --------------------------------
+     No hay backend: al enviar se arma el mensaje con los datos y se
+     abre el chat de WhatsApp de Brandísimas.                          */
+  var form = document.getElementById('quoteForm');
+
+  if (form) {
+    var done        = document.getElementById('quoteDone');
+    var doneName    = document.getElementById('doneName');
+    var doneSummary = document.getElementById('doneSummary');
+    var doneWa      = document.getElementById('doneWa');
+    var resetBtn    = document.getElementById('quoteReset');
+    var errorBox    = document.getElementById('formError');
+    var orgLabel    = document.getElementById('orgLabel');
+    var orgInput    = document.getElementById('orgInput');
+    var tipoBtns    = Array.prototype.slice.call(form.querySelectorAll('[data-tipo]'));
+    var prodBtns    = Array.prototype.slice.call(form.querySelectorAll('[data-prod]'));
+
+    var tipo = 'Celebración';
+
+    function setOn(btn, on) {
+      btn.classList.toggle('is-on', on);
+      btn.setAttribute('aria-pressed', String(on));
+    }
+
+    function setTipo(t) {
+      tipo = t;
+      tipoBtns.forEach(function (b) { setOn(b, b.getAttribute('data-tipo') === t); });
+      var emp = t === 'Empresa';
+      orgLabel.textContent = emp ? 'Empresa' : 'Tipo de celebración';
+      orgInput.placeholder = emp ? 'Nombre de la empresa' : 'Cumpleaños, matrimonio…';
+    }
+
+    tipoBtns.forEach(function (b) {
+      b.addEventListener('click', function () { setTipo(b.getAttribute('data-tipo')); });
+    });
+
+    prodBtns.forEach(function (b) {
+      b.addEventListener('click', function () { setOn(b, !b.classList.contains('is-on')); });
+    });
+
+    // Los botones de Servicios dejan el tipo de evento ya elegido.
+    document.querySelectorAll('[data-pick]').forEach(function (a) {
+      a.addEventListener('click', function () { setTipo(a.getAttribute('data-pick')); });
+    });
+
+    function clearErrors() {
+      errorBox.hidden = true;
+      form.querySelectorAll('.is-invalid').forEach(function (el) { el.classList.remove('is-invalid'); });
+    }
+
+    form.addEventListener('input', function (e) {
+      if (e.target.classList) e.target.classList.remove('is-invalid');
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearErrors();
+
+      var invalid = Array.prototype.filter.call(form.elements, function (el) {
+        return el.willValidate && !el.checkValidity();
+      });
+      if (invalid.length) {
+        invalid.forEach(function (el) { el.classList.add('is-invalid'); });
+        errorBox.textContent = 'Revisa los campos marcados: nombre, un email válido y el número de invitados.';
+        errorBox.hidden = false;
+        invalid[0].focus();
+        return;
+      }
+
+      var f = new FormData(form);
+      var val = function (k) { return String(f.get(k) || '').trim(); };
+      var emp = tipo === 'Empresa';
+      var prods = prodBtns
+        .filter(function (b) { return b.classList.contains('is-on'); })
+        .map(function (b) { return b.getAttribute('data-prod'); });
+
+      var fecha = val('fecha');
+      if (fecha) fecha = fecha.split('-').reverse().join('-');   // aaaa-mm-dd → dd-mm-aaaa
+
+      var lines = [
+        'Hola Brandísimas! Quiero cotizar el stand para mi evento.',
+        '',
+        '*Tipo de evento:* ' + tipo,
+        '*Nombre:* ' + val('nombre')
+      ];
+      if (val('org'))      lines.push('*' + (emp ? 'Empresa' : 'Tipo de celebración') + ':* ' + val('org'));
+      lines.push('*Email:* ' + val('email'));
+      if (val('telefono')) lines.push('*Teléfono:* ' + val('telefono'));
+      if (fecha)           lines.push('*Fecha del evento:* ' + fecha);
+      lines.push('*Invitados:* ' + val('invitados'));
+      if (prods.length)    lines.push('*Productos:* ' + prods.join(', '));
+      if (val('mensaje'))  lines.push('', val('mensaje'));
+
+      var url = waUrl(lines.join('\n'));
+
+      doneName.textContent = val('nombre').split(' ')[0];
+      doneSummary.textContent =
+        (emp ? 'un evento de empresa' : 'una celebración') +
+        ' (' + val('invitados').toLowerCase() + ' invitados' +
+        (prods.length ? ', ' + prods.join(', ').toLowerCase() : '') + ')';
+      doneWa.href = url;
+
+      form.hidden = true;
+      done.hidden = false;
+
+      // Si el navegador bloquea la ventana nueva, queda el botón de respaldo.
+      window.open(url, '_blank', 'noopener');
+    });
+
+    resetBtn.addEventListener('click', function () {
+      form.reset();
+      prodBtns.forEach(function (b) { setOn(b, false); });
+      setTipo('Celebración');
+      clearErrors();
+      done.hidden = true;
+      form.hidden = false;
+    });
+  }
+
   /* ---------- GSAP ----------------------------------------------------
      Solo posición, escala y rotación. Nunca opacity: si GSAP no carga,
      todo el contenido ya es visible por CSS.                           */
-  if (window.gsap && window.ScrollTrigger && !reduced) {
-    gsap.registerPlugin(ScrollTrigger);
+  if (window.gsap && !reduced) {
+    if (window.ScrollTrigger) {
+      gsap.registerPlugin(ScrollTrigger);
 
-    gsap.from('.hero-copy h1',      { y: 34, duration: 0.8, ease: 'power3.out', delay: 0.9 });
-    gsap.from('.hero-lead',         { y: 26, duration: 0.8, ease: 'power3.out', delay: 1.02 });
-    gsap.from('.hero-actions .btn', { y: 22, duration: 0.7, ease: 'power3.out', delay: 1.14, stagger: 0.08 });
-    gsap.from('.hero-media img',    { y: 40, scale: 0.96, duration: 1, ease: 'power3.out', delay: 0.95 });
-
-    document.querySelectorAll('.banner').forEach(function (el) {
-      gsap.from(el, {
-        scale: 0.9, y: 18, duration: 0.6, ease: 'back.out(1.6)',
-        scrollTrigger: { trigger: el, start: 'top 88%' }
+      // Solo los originales: los clones del carrusel ya entran colocados.
+      gsap.from('.product:not([data-clone])', {
+        y: 40, duration: 0.7, ease: 'power3.out', stagger: 0.09,
+        scrollTrigger: { trigger: '.carousel', start: 'top 85%' }
       });
-    });
-
-    gsap.from('.step', {
-      y: 46, duration: 0.75, ease: 'power3.out', stagger: 0.12,
-      scrollTrigger: { trigger: '.steps-grid', start: 'top 82%' }
-    });
-
-    document.querySelectorAll('.service').forEach(function (el) {
-      gsap.from(el, {
-        y: 44, duration: 0.8, ease: 'power3.out',
-        scrollTrigger: { trigger: el, start: 'top 82%' }
-      });
-    });
-
-    gsap.from('.barra-box', {
-      y: 44, duration: 0.8, ease: 'power3.out',
-      scrollTrigger: { trigger: '.barra-box', start: 'top 85%' }
-    });
-
-    gsap.from('.barra-pills li', {
-      x: 34, duration: 0.6, ease: 'power3.out', stagger: 0.08,
-      scrollTrigger: { trigger: '.barra-pills', start: 'top 85%' }
-    });
-
-    // Solo los originales: los clones del carrusel ya entran colocados.
-    gsap.from('.product:not([data-clone])', {
-      y: 40, duration: 0.7, ease: 'power3.out', stagger: 0.09,
-      scrollTrigger: { trigger: '.carousel', start: 'top 85%' }
-    });
-
-    gsap.from('.cta-copy, .cta-btn', {
-      y: 32, duration: 0.75, ease: 'power3.out', stagger: 0.1,
-      scrollTrigger: { trigger: '.cta-final', start: 'top 80%' }
-    });
-
-    /* --- Flores: giro lento ligado al scroll (sobre el contenedor) --- */
-    document.querySelectorAll('.flor').forEach(function (el, i) {
-      gsap.to(el, {
-        rotation: i % 2 === 0 ? 70 : -70,
-        ease: 'none',
-        scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 1.2 }
-      });
-    });
-
-    /* --- Easter egg: click en una flor = vuelta completa -------------
-       Gira la marca interna, no el contenedor, para no pelear con el
-       scrub de arriba.                                               */
-    document.querySelectorAll('.flor-mark').forEach(function (mark) {
-      /* Una sola vuelta: toma impulso hacia atrás y gira una vez.
-         Va en una timeline pausada para que un click no pise al
-         anterior. */
-      var tl = gsap.timeline({
-        paused: true,
-        onComplete: function () { gsap.set(mark, { rotation: 0 }); }
-      });
-
-      /* Solo rotación, y arranca en el click: sin impulso previo, sin
-         escala y sin sobregiro. power2.out sale a velocidad de
-         inmediato y frena al llegar. */
-      tl.fromTo(mark,
-          { rotation: 0 },
-          { rotation: 360, duration: 1.45, ease: 'power2.out' });
-
-      /* Único pomo de velocidad: <1 la enlentece, >1 la acelera.
-         Se toca esto y no las duraciones, así la coreografía
-         (impulso, vuelta, salto, aterrizaje) mantiene sus proporciones. */
-      tl.timeScale(1);
-
-      mark.addEventListener('click', function () {
-        if (tl.isActive()) return;
-        tl.restart();
-      });
-    });
+    }
 
     /* --- Tilt con parallax de mouse en las imágenes ------------------
        Excluye el carrusel a propósito: ahí el movimiento compite con
