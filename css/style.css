@@ -1025,23 +1025,10 @@ main { overflow-x: clip; }
   .hero-inner, .about-inner, .quote-inner { padding-block: var(--sec-pad); }
   .cta-box { width: 100%; }
 
-  .section-head { gap: 8px; }
-  .steps-grid, .services-grid { margin-top: 28px; }
+  .products .section-head { gap: 8px; }
+  .steps-grid { margin-top: 28px; }
 
-  /* Servicios: tarjeta horizontal (foto a la izquierda) para que las
-     dos tarjetas y "Siempre incluye" quepan en una pantalla. */
-  .service { flex-direction: row; }
-  .service-media { flex: 0 0 30%; display: flex; }
-  .service-photo { flex: 1; aspect-ratio: auto; min-height: 100%; }
-  .service-body { padding: 26px 28px; gap: 16px; }
-
-  .includes {
-    margin-top: 20px;
-    padding: 18px 28px;
-    grid-template-columns: auto 1fr;
-    gap: 24px;
-  }
-  .includes-list { grid-column: auto; }
+  /* Servicios conserva su diseño tal cual: solo se escala (main.js). */
 
   /* Productos: el ancho del carrusel se limita por el alto disponible,
      así las tarjetas nunca empujan la sección fuera de la pantalla. */
