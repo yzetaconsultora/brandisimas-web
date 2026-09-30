@@ -661,7 +661,9 @@ main { overflow-x: clip; }
   scroll-snap-align: start;
   border-radius: var(--radius-card);
   overflow: hidden;
-  background: var(--white);
+  /* Sin tarjeta blanca: el fondo es el mismo de la sección y las fotos
+     (producto sobre blanco) se multiplican, así el blanco desaparece. */
+  background: var(--cream);
   aspect-ratio: 452 / 481;
 }
 /* Posición absoluta en vez de height:100% dentro de un grid centrado:
@@ -674,6 +676,8 @@ main { overflow-x: clip; }
   height: 100%;
   object-fit: contain;
   padding: clamp(8px, 1.1vw, 18px);
+  mix-blend-mode: multiply;
+  filter: brightness(1.01);   /* el fondo de las fotos es 254, no 255 */
 }
 .product h3 {
   position: absolute;
@@ -993,6 +997,67 @@ main { overflow-x: clip; }
 
   .wa-float { width: 54px; height: 54px; bottom: 16px; right: 16px; }
   .wa-float svg { width: 28px; height: 28px; }
+}
+
+/* ---------- Una pantalla por sección + imán de scroll ---------------
+   Mismo criterio que yzeta.cl: `mandatory` (con proximity un gesto
+   corto deja el scroll a media sección), solo en escritorio y desde
+   600px de alto para incluir notebooks (1366x657, 1536x730). El footer
+   remata al final; sin ese punto mandatory no deja llegar a él.
+   Cada sección mide la ventana menos la navbar; lo que no alcanza a
+   entrar lo reduce main.js con zoom (ver "Ajuste a una pantalla").   */
+@media (min-width: 1024px) and (min-height: 600px) {
+  :root { --sec-pad: clamp(20px, 3.5vh, 44px); }
+
+  html {
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: var(--nav-h);
+  }
+  main > section {
+    scroll-snap-align: start;
+    min-height: calc(100svh - var(--nav-h));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  body > footer { scroll-snap-align: end; }
+
+  .hero-inner, .about-inner, .quote-inner { padding-block: var(--sec-pad); }
+  .cta-box { width: 100%; }
+
+  .section-head { gap: 8px; }
+  .steps-grid, .services-grid { margin-top: 28px; }
+
+  /* Servicios: tarjeta horizontal (foto a la izquierda) para que las
+     dos tarjetas y "Siempre incluye" quepan en una pantalla. */
+  .service { flex-direction: row; }
+  .service-media { flex: 0 0 30%; display: flex; }
+  .service-photo { flex: 1; aspect-ratio: auto; min-height: 100%; }
+  .service-body { padding: 26px 28px; gap: 16px; }
+
+  .includes {
+    margin-top: 20px;
+    padding: 18px 28px;
+    grid-template-columns: auto 1fr;
+    gap: 24px;
+  }
+  .includes-list { grid-column: auto; }
+
+  /* Productos: el ancho del carrusel se limita por el alto disponible,
+     así las tarjetas nunca empujan la sección fuera de la pantalla. */
+  .carousel {
+    margin-top: 28px;
+    max-width: calc((100svh - var(--nav-h) - 230px) * 2.82 + 182px);
+    margin-inline: auto;
+  }
+
+  .quote-copy { gap: 18px; }
+  .quote-card { padding: 28px 32px; }
+  .quote-form { gap: 16px; }
+  .field input, .field select, .field textarea { padding: 11px 14px; }
+  .field input[type="date"] { padding-block: 10px; }
+  .toggle { padding: 10px 20px; }
+  .toggle--sm { padding: 8px 16px; }
 }
 
 /* --- Preferencia de movimiento reducido --- */
