@@ -603,13 +603,11 @@ main { overflow-x: clip; }
 }
 .includes-list .flor-ico { width: 16px; }
 
-@media (min-width: 1100px) {
-  .services-grid { grid-template-columns: 270px minmax(0, 1fr) minmax(0, 1fr); }
-}
-@media (max-width: 1099px) {
-  .includes-card { order: 1; grid-column: 1 / -1; }
-  .includes-list { flex-direction: row; flex-wrap: wrap; }
-}
+/* Por defecto va debajo de las dos tarjetas, a lo ancho: las tarjetas
+   de servicio no se mueven. En escritorio con imán se ubica al margen
+   izquierdo (ver más abajo). */
+.includes-card { order: 1; grid-column: 1 / -1; }
+.includes-list { flex-direction: row; flex-wrap: wrap; }
 
 /* ============================================================
    6. PRODUCTOS
@@ -1034,13 +1032,16 @@ main { overflow-x: clip; }
   .products .section-head { gap: 8px; }
   .steps-grid { margin-top: 28px; }
 
-  /* Servicios conserva su diseño tal cual: las dos tarjetas mantienen
-     su ancho original (580px, el de un contenedor de 1280) y la tarjeta
-     "Siempre incluye" se suma a la izquierda. El conjunto se escala
-     entero para caber (main.js, data-fit-keep-width). */
-  #servicios > .container { width: max-content; max-width: none; }
-  #servicios .services-grid { grid-template-columns: 270px 580px 580px; }
-  #servicios .includes-card { order: 0; grid-column: auto; }
+  /* Servicios conserva su diseño tal cual y solo se escala (main.js).
+     "Siempre incluye" queda fuera de la grilla, en el margen izquierdo
+     junto a la primera tarjeta, así las tarjetas no se desplazan. */
+  #servicios .services-grid { position: relative; }
+  #servicios .includes-card {
+    position: absolute;
+    top: 0;
+    right: calc(100% + 24px);
+    width: 270px;
+  }
   #servicios .includes-list { flex-direction: column; flex-wrap: nowrap; }
 
   /* Productos: el ancho del carrusel se limita por el alto disponible,
