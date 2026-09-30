@@ -570,8 +570,11 @@ main { overflow-x: clip; }
 
 .service-btn { margin-top: auto; align-self: flex-start; }
 
+/* "Siempre incluye" va en su propia sección (una pantalla con el imán);
+   en móvil se lee como continuación de Servicios. */
+.includes-sec { background: var(--pink); padding-block: 0 var(--sec-pad); }
+
 .includes {
-  margin-top: 56px;
   background: var(--pink-soft);
   border-radius: 32px;
   padding: clamp(28px, 3vw, 40px);
@@ -981,7 +984,7 @@ main { overflow-x: clip; }
   .about-photo { max-height: none; }
 
   .steps-flor { width: 80px; right: 4%; top: 28px; }
-  .steps-grid, .services-grid, .includes { margin-top: 40px; }
+  .steps-grid, .services-grid { margin-top: 40px; }
 
   .service-btn, .quote-submit { align-self: stretch; }
   .hero-actions .btn, .cta-actions .btn { flex: 1 1 auto; }
@@ -1023,6 +1026,7 @@ main { overflow-x: clip; }
   body > footer { scroll-snap-align: end; }
 
   .hero-inner, .about-inner, .quote-inner { padding-block: var(--sec-pad); }
+  .includes-sec { padding-block: var(--sec-pad); }
   .cta-box { width: 100%; }
 
   .products .section-head { gap: 8px; }
