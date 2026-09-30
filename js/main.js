@@ -145,16 +145,23 @@
        tamaño completo, solo más chica (Servicios, a pedido del cliente).
        Su ancho lo fija el CSS, así que también debe caber a lo ancho. */
     if (box.hasAttribute('data-fit-keep-width')) {
-      var roomW = sec.clientWidth;
-      if (r.height <= avail && r.width <= roomW) return;
-      var kz = Math.max(minZ, Math.min(1, avail / r.height, roomW / r.width));
+      // Elementos fuera del flujo (p. ej. "Siempre incluye" al margen)
+      // también deben quedar dentro de la pantalla.
+      var side = box.querySelector('[data-fit-side]');
+      var secLeft = sec.getBoundingClientRect().left;
+      function sideOut() {
+        return side && getComputedStyle(side).position === 'absolute' &&
+               side.getBoundingClientRect().left < secLeft + 8;
+      }
+      if (r.height <= avail && !sideOut()) return;
+
+      box.style.maxWidth = r.width + 'px';
+      var kz = Math.max(minZ, Math.min(1, avail / r.height));
       box.style.zoom = kz;
-      // el redondeo del zoom puede dejarla unos px más grande que el espacio
-      var kr = box.getBoundingClientRect();
-      while (kz > minZ && (kr.height > avail || kr.width > roomW)) {
+      // el redondeo del zoom puede dejarla unos px más alta que la pantalla
+      while (kz > minZ && (box.getBoundingClientRect().height > avail || sideOut())) {
         kz -= 0.002;
         box.style.zoom = kz;
-        kr = box.getBoundingClientRect();
       }
       return;
     }
