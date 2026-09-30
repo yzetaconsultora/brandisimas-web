@@ -369,25 +369,6 @@ main { overflow-x: clip; }
   height: 126px;
 }
 
-.hero-sticker {
-  position: absolute;
-  left: 43px;
-  top: 435px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--plum);
-  color: var(--white);
-  padding: 10px 18px;
-  border-radius: var(--radius-pill);
-  font-weight: 700;
-  font-size: 15px;
-  transform: rotate(-6deg);
-  box-shadow: 0 14px 30px -10px rgba(20, 20, 20, 0.35);
-}
-.hero-sticker .flor-ico { width: 18px; color: var(--pink); }
-
 /* ============================================================
    3. DE QUÉ SE TRATA
    ============================================================ */
@@ -991,7 +972,6 @@ main { overflow-x: clip; }
   .hero-flor-a { width: 190px; right: -80px; top: -50px; }
   .hero-flor-b { width: 140px; left: -50px; bottom: -50px; }
   .hero-collage { min-height: 500px; }
-  .hero-sticker { left: 24px; top: 400px; }
 
   .about-flor { width: 84px; right: -14px; top: -28px; }
   .about-photo { max-height: none; }
