@@ -142,6 +142,22 @@
     if (r.height <= avail) return;
 
     var base = r.width;
+    var minZ = parseFloat(box.getAttribute('data-fit-min')) || FIT_MIN;
+
+    /* data-fit-keep-width: escala pura, la sección se ve igual que a
+       tamaño completo, solo más chica (Servicios, a pedido del cliente). */
+    if (box.hasAttribute('data-fit-keep-width')) {
+      box.style.maxWidth = base + 'px';
+      var kz = Math.max(minZ, avail / r.height);
+      box.style.zoom = kz;
+      // el redondeo del zoom puede dejarla unos px más alta que la pantalla
+      while (kz > minZ && box.getBoundingClientRect().height > avail) {
+        kz -= 0.002;
+        box.style.zoom = kz;
+      }
+      return;
+    }
+
     var wideMax = Math.max(base, Math.min(sec.clientWidth, FIT_WIDE));
 
     /* Dos estrategias y gana la que deja el zoom más alto: ensanchar
@@ -151,7 +167,7 @@
       var z = 1, h = r.height;
 
       function apply(v) {
-        z = Math.max(FIT_MIN, Math.min(1, v));
+        z = Math.max(minZ, Math.min(1, v));
         box.style.zoom = z;
         // max-width va en px del elemento: el ancho en pantalla es max-width × zoom
         box.style.maxWidth = (Math.min(wide, base / z) / z) + 'px';
@@ -162,7 +178,7 @@
         apply(z * avail / h);
         if (h <= avail && h > avail - 6) break;
       }
-      while (h > avail && z > FIT_MIN) apply(z - 0.01);
+      while (h > avail && z > minZ) apply(z - 0.01);
       // Y lo más grande posible: subir de a poco mientras siga cabiendo.
       while (z < 1) {
         var fits = z;
@@ -187,6 +203,81 @@
     window.addEventListener('load', fitAll);
     window.addEventListener('resize', fitLater);
   }
+
+  /* ---------- Rueda del mouse: un gesto = una sección -----------------
+     Con solo el snap de CSS, Chrome decide el destino según distancia e
+     inercia: un giro corto de rueda o un gesto suave de trackpad vuelve
+     a la sección actual y parece que el scroll no funciona. Aquí cada
+     gesto va a la sección siguiente o anterior, y la inercia del
+     trackpad se descarta hasta que el gesto termina. Teclado y barra de
+     scroll siguen con el snap de CSS.                                  */
+  var WHEEL_QUIET = 220;   // ms sin eventos de rueda = gesto terminado
+  var WHEEL_MIN = 24;      // delta acumulado mínimo para cambiar de sección
+  var paging = false, lastWheel = 0, wheelAcc = 0;
+
+  function snapTops() {
+    var nh = nav ? nav.offsetHeight : 0;
+    var tops = Array.prototype.map.call(document.querySelectorAll('main > section'), function (s) {
+      return Math.round(s.getBoundingClientRect().top + window.scrollY - nh);
+    });
+    tops.push(document.documentElement.scrollHeight - window.innerHeight);   // footer
+    return tops;
+  }
+
+  // ¿El cursor está sobre algo que debe hacer su propio scroll? (textarea, etc.)
+  function scrollsInside(el, dy) {
+    for (; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+      if (el.scrollHeight <= el.clientHeight + 1) continue;
+      var oy = getComputedStyle(el).overflowY;
+      if (oy !== 'auto' && oy !== 'scroll') continue;
+      if (dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0) return true;
+    }
+    return false;
+  }
+
+  function pageTo(target) {
+    paging = true;
+    wheelAcc = 0;
+    window.scrollTo({ top: target, behavior: reduced ? 'auto' : 'smooth' });
+    var started = Date.now();
+    (function wait() {
+      var arrived = Math.abs(window.scrollY - target) < 2 || Date.now() - started > 1600;
+      if (arrived && Date.now() - lastWheel > WHEEL_QUIET) { paging = false; return; }
+      setTimeout(wait, 50);
+    })();
+  }
+
+  window.addEventListener('wheel', function (e) {
+    if (!fitMq.matches || e.ctrlKey) return;                       // ctrl+rueda = zoom
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;           // gesto horizontal (carrusel)
+    if (scrollsInside(e.target, e.deltaY)) return;
+
+    var now = Date.now();
+    if (now - lastWheel > WHEEL_QUIET) wheelAcc = 0;
+    lastWheel = now;
+
+    if (paging) { e.preventDefault(); return; }
+
+    var tops = snapTops();
+    var y = window.scrollY;
+    var useful = window.innerHeight - (nav ? nav.offsetHeight : 0);
+    var i = 0;
+    while (i + 1 < tops.length && tops[i + 1] <= y + 2) i++;
+
+    var dir = e.deltaY > 0 ? 1 : -1;
+    // Sección más alta que la pantalla: se recorre libre hasta su borde.
+    if (dir > 0 && i + 1 < tops.length && y + useful < tops[i + 1] - 2) return;
+
+    e.preventDefault();
+    wheelAcc += e.deltaY;
+    if (Math.abs(wheelAcc) < WHEEL_MIN) return;
+
+    var target = dir > 0
+      ? tops[Math.min(i + 1, tops.length - 1)]
+      : (y > tops[i] + 2 ? tops[i] : tops[Math.max(i - 1, 0)]);
+    if (Math.abs(target - y) < 2) { wheelAcc = 0; return; }
+    pageTo(target);
+  }, { passive: false });
 
   /* ---------- Carrusel infinito de productos --------------------------
      Se clona el set completo a cada lado y se salta el scroll un set
