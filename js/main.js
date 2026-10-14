@@ -56,6 +56,31 @@
   var anchors = folders.map(function (f) { return f.previousElementSibling; });
   var T = 0, gapTop = 0;
 
+  /* En escritorio, una carpeta más alta que la pantalla se escala (zoom)
+     hasta caber, así nunca se pega por arriba y las pestañas de las
+     carpetas anteriores siguen a la vista.                          */
+  var canZoom = window.CSS && CSS.supports && CSS.supports('zoom', '1');
+  function fitFolder(f, avail) {
+    var sheet = f.querySelector('.folder-sheet');
+    var kids = Array.prototype.slice.call(sheet.children);
+    var z = parseFloat(sheet.getAttribute('data-z')) || 1;
+    if (!canZoom || window.innerWidth < 1024) {
+      if (z !== 1) { kids.forEach(function (k) { k.style.zoom = ''; }); sheet.removeAttribute('data-z'); }
+      return;
+    }
+    var cs = getComputedStyle(sheet);
+    var pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    for (var pass = 0; pass < 3; pass++) {
+      var content = kids[kids.length - 1].getBoundingClientRect().bottom - kids[0].getBoundingClientRect().top;
+      var room = avail - pad - 8;
+      var nz = Math.max(window.innerHeight < 700 ? 0.58 : 0.62, Math.min(1, z * room / content));
+      if (Math.abs(nz - z) < 0.01) break;
+      z = nz;
+      kids.forEach(function (k) { k.style.zoom = z === 1 ? '' : z; });
+    }
+    sheet.setAttribute('data-z', z);
+  }
+
   function layoutStack() {
     var tab = folders[0].querySelector('.folder-tab');
     var tabH = tab.offsetHeight;
@@ -65,6 +90,7 @@
     root.style.setProperty('--T', T + 'px');
     var vh = window.innerHeight;
     var tallBefore = false;
+    folders.forEach(function (f) { fitFolder(f, vh - T); });
     folders.forEach(function (f) {
       var top = Math.min(T, vh - f.offsetHeight);
       f.style.setProperty('--top', top + 'px');
@@ -256,24 +282,6 @@
     });
   }
 
-  /* ---------- Resorte (modelo de Apple: damping + response) ----------
-     Arranca siempre desde el valor actual y con la velocidad que trae
-     el gesto, así no hay salto entre arrastre y animación.           */
-  function Spring(opts) {
-    this.x = 0; this.v = 0; this.target = 0;
-    this.k = Math.pow(2 * Math.PI / opts.response, 2);
-    this.c = 4 * Math.PI * opts.damping / opts.response;
-  }
-  Spring.prototype.step = function (dt) {
-    var n = 4, h = dt / n;
-    for (var i = 0; i < n; i++) {
-      var a = -this.k * (this.x - this.target) - this.c * this.v;
-      this.v += a * h;
-      this.x += this.v * h;
-    }
-    return Math.abs(this.v) > 0.02 || Math.abs(this.x - this.target) > 0.02;
-  };
-
   if (!hasGsap) {
     setActive(null);
     return;
@@ -348,7 +356,6 @@
         rotation: function (i) { return [-6, 5, -4][i]; },
         duration: 1.35, ease: 'expo.out', stagger: 0.09
       }, 0.3)
-      .from('.seal', { scale: 0, duration: 1, ease: 'back.out(1.6)' }, 0.7)
       .from('.hero-copy > *', { y: 34, duration: 1, ease: 'expo.out', stagger: 0.08 }, 0.5);
 
     // Flote continuo, cada foto a su ritmo
@@ -371,103 +378,25 @@
       .to('.hero-waves', { yPercent: 8, ease: 'none' }, 0)
       .to('.hero-copy', { y: 70, ease: 'none' }, 0);
 
-    // Parallax con el mouse (profundidad distinta por foto)
+    // Tilt al pasar el mouse por encima de cada foto (sin parallax)
     if (fine) {
-      var hero = document.querySelector('.hero');
-      var pars = floats.map(function (f) {
+      floats.forEach(function (f) {
         var el = f.querySelector('.f-par');
-        return {
-          d: parseFloat(f.getAttribute('data-depth')) || 1,
-          x: gsap.quickTo(el, 'x', { duration: 0.9, ease: 'power3.out' }),
-          y: gsap.quickTo(el, 'y', { duration: 0.9, ease: 'power3.out' })
-        };
-      });
-      var sx = gsap.quickTo('.slogan-line', 'x', { duration: 1.1, ease: 'power3.out' });
-      hero.addEventListener('pointermove', function (e) {
-        var nx = e.clientX / window.innerWidth - 0.5;
-        var ny = e.clientY / window.innerHeight - 0.5;
-        pars.forEach(function (p) { p.x(nx * 34 * p.d); p.y(ny * 26 * p.d); });
-        sx(nx * -10);
-      });
-      hero.addEventListener('pointerleave', function () {
-        pars.forEach(function (p) { p.x(0); p.y(0); });
-        sx(0);
+        gsap.set(el, { transformPerspective: 800 });
+        var rx = gsap.quickTo(el, 'rotationX', { duration: 0.5, ease: 'power3.out' });
+        var ry = gsap.quickTo(el, 'rotationY', { duration: 0.5, ease: 'power3.out' });
+        f.addEventListener('pointermove', function (e) {
+          var r = f.getBoundingClientRect();
+          var nx = (e.clientX - r.left) / r.width - 0.5;
+          var ny = (e.clientY - r.top) / r.height - 0.5;
+          rx(ny * -16);
+          ry(nx * 18);
+        });
+        f.addEventListener('pointerleave', function () {
+          gsap.to(el, { rotationX: 0, rotationY: 0, duration: 1, ease: 'elastic.out(1, 0.5)', overwrite: 'auto' });
+        });
       });
     }
-  }
-
-  /* ---------- Arrastrar y lanzar las fotos --------------------------- */
-  if (fine && !reduced) {
-    document.querySelectorAll('.f-drag').forEach(function (el) {
-      var sx = new Spring({ damping: 0.72, response: 0.55 });
-      var sy = new Spring({ damping: 0.72, response: 0.55 });
-      var sr = new Spring({ damping: 0.6, response: 0.45 });
-      var set = gsap.quickSetter(el, 'css');
-      var dragging = false, running = false, ox = 0, oy = 0, hist = [];
-      var floatEl = el.closest('.float');
-
-      function render() { set({ x: sx.x, y: sy.x, rotation: sr.x }); }
-
-      function tick() {
-        var dt = Math.min(gsap.ticker.deltaRatio() / 60, 1 / 30);
-        var a = sx.step(dt), b = sy.step(dt), c = sr.step(dt);
-        render();
-        if (!(a || b || c)) { gsap.ticker.remove(tick); running = false; floatEl.style.zIndex = ''; }
-      }
-
-      el.addEventListener('pointerdown', function (e) {
-        if (e.button !== 0) return;
-        e.preventDefault();
-        el.setPointerCapture(e.pointerId);
-        dragging = true;
-        if (running) { gsap.ticker.remove(tick); running = false; }
-        // Respeta el punto de agarre y parte desde donde está
-        ox = e.clientX - sx.x; oy = e.clientY - sy.x;
-        sx.v = sy.v = sr.v = 0;
-        hist = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
-        el.classList.add('is-grab');
-        floatEl.style.zIndex = 8;
-      });
-
-      el.addEventListener('pointermove', function (e) {
-        if (!dragging) return;
-        var now = performance.now();
-        hist.push({ x: e.clientX, y: e.clientY, t: now });
-        while (hist.length > 2 && now - hist[0].t > 90) hist.shift();
-        var h0 = hist[0], dtv = Math.max(now - h0.t, 1) / 1000;
-        var vx = (e.clientX - h0.x) / dtv;
-        sx.x = e.clientX - ox;
-        sy.x = e.clientY - oy;
-        sr.x = Math.max(-18, Math.min(18, vx * 0.012));
-        render();
-      });
-
-      function release(e) {
-        if (!dragging) return;
-        dragging = false;
-        el.classList.remove('is-grab');
-        var now = performance.now();
-        var h0 = hist[0] || { x: e.clientX, y: e.clientY, t: now - 16 };
-        var dtv = Math.max(now - h0.t, 1) / 1000;
-        // Entrega la velocidad del dedo al resorte
-        sx.v = (e.clientX - h0.x) / dtv;
-        sy.v = (e.clientY - h0.y) / dtv;
-        if (now - h0.t > 120) { sx.v = sy.v = 0; }
-        if (!running) { gsap.ticker.add(tick); running = true; }
-      }
-      el.addEventListener('pointerup', release);
-      el.addEventListener('pointercancel', release);
-    });
-  }
-
-  /* ---------- Sello: solo gira el texto; el isotipo queda quieto ---- */
-  var ring = document.querySelector('.seal-ring');
-  if (ring && !reduced) {
-    var spin = gsap.to(ring, { rotation: 360, duration: 24, ease: 'none', repeat: -1, transformOrigin: '50% 50%' });
-    gsap.ticker.add(function () {
-      var target = 1 + Math.min(Math.abs(scrollVelocity()) * 0.25, 8);
-      spin.timeScale(spin.timeScale() + (target - spin.timeScale()) * 0.08);
-    });
   }
 
   /* ---------- Imán en botones --------------------------------------- */
@@ -487,69 +416,83 @@
     });
   }
 
-  /* ---------- Ticker con velocidad de scroll ------------------------- */
-  var track = document.querySelector('.ticker-track');
-  if (track && !reduced) {
-    var row = track.querySelector('.ticker-row');
-    var rowW = 0, tx = 0, dir = 1;
-    var fill = function () {
-      while (track.children.length > 1) track.removeChild(track.lastChild);
-      rowW = row.getBoundingClientRect().width;
-      var copies = Math.ceil((window.innerWidth * 2) / rowW);
-      for (var c = 0; c < copies; c++) {
-        var clone = row.cloneNode(true);
-        clone.setAttribute('aria-hidden', 'true');
-        track.appendChild(clone);
-      }
-    };
-    fill();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fill);
-    gsap.ticker.add(function () {
-      if (!rowW) return;
-      var dt = gsap.ticker.deltaRatio() / 60;
-      var v = scrollVelocity();
-      if (v > 0.5) dir = 1; else if (v < -0.5) dir = -1;
-      tx -= (60 + Math.min(Math.abs(v) * 40, 900)) * dir * dt;
-      tx = ((tx % rowW) - rowW) % rowW;
-      track.style.transform = 'translate3d(' + tx + 'px,0,0)';
+  /* ---------- Carrusel infinito de productos --------------------------
+     El mismo del sitio en producción: se clona el set completo a cada
+     lado y se salta el scroll un set entero al llegar a un borde.     */
+  var track = document.getElementById('prodTrack');
+  var prev  = document.getElementById('prodPrev');
+  var next  = document.getElementById('prodNext');
+
+  if (track && prev && next) {
+    var originals = Array.prototype.slice.call(track.children);
+    var setLen = originals.length;
+
+    var before = document.createDocumentFragment();
+    var after  = document.createDocumentFragment();
+    originals.forEach(function (li) {
+      var a = li.cloneNode(true);
+      var b = li.cloneNode(true);
+      [a, b].forEach(function (c) {
+        c.setAttribute('data-clone', '');
+        c.setAttribute('aria-hidden', 'true');
+        c.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
+      });
+      before.appendChild(a);
+      after.appendChild(b);
     });
-    window.addEventListener('resize', fill);
+    track.insertBefore(before, track.firstChild);
+    track.appendChild(after);
+
+    var setWidth = 0;
+
+    var measure = function () {
+      var items = track.children;
+      if (!items.length) return 0;
+      var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      var w = items[0].getBoundingClientRect().width + gap;
+      setWidth = w * setLen;
+      return w;
+    };
+
+    var jump = function (delta) {
+      var prevBehavior = track.style.scrollBehavior;
+      track.style.scrollBehavior = 'auto';
+      track.scrollLeft += delta;
+      void track.offsetWidth;
+      track.style.scrollBehavior = prevBehavior;
+    };
+
+    var recenter = function () {
+      if (!setWidth) return;
+      if (track.scrollLeft < setWidth * 0.5) jump(setWidth);
+      else if (track.scrollLeft > setWidth * 1.5) jump(-setWidth);
+    };
+
+    var resetCarousel = function () {
+      measure();
+      jump(setWidth - track.scrollLeft);
+    };
+
+    var idle;
+    track.addEventListener('scroll', function () {
+      clearTimeout(idle);
+      idle = setTimeout(recenter, 140);
+    }, { passive: true });
+
+    var move = function (dir) {
+      var itemWidth = measure();
+      recenter();
+      track.scrollBy({ left: dir * itemWidth, behavior: reduced ? 'auto' : 'smooth' });
+    };
+
+    prev.addEventListener('click', function () { move(-1); });
+    next.addEventListener('click', function () { move(1); });
+
+    window.addEventListener('resize', resetCarousel);
+    resetCarousel();
+    window.addEventListener('load', resetCarousel);
   }
 
-  /* ---------- Productos: etiquetas que se balancean ------------------ */
-  var tags = Array.prototype.slice.call(document.querySelectorAll('.tag'));
-  if (tags.length && !reduced) {
-    tags.forEach(function (tag, i) {
-      var s = new Spring({ damping: 0.1, response: 1.15 });
-      var set = gsap.quickSetter(tag, 'rotation', 'deg');
-      var running = false;
-      function tick() {
-        var dt = Math.min(gsap.ticker.deltaRatio() / 60, 1 / 30);
-        var moving = s.step(dt);
-        set(s.x);
-        if (!moving) { gsap.ticker.remove(tick); running = false; set(0); s.x = 0; s.v = 0; }
-      }
-      function push(v) {
-        s.v += v;
-        s.v = Math.max(-260, Math.min(260, s.v));
-        if (!running) { gsap.ticker.add(tick); running = true; }
-      }
-      tag._push = push;
-      if (fine) {
-        tag.addEventListener('pointermove', function (e) { push(e.movementX * 2.2); });
-      } else {
-        tag.addEventListener('pointerdown', function () { push((i % 2 ? -1 : 1) * 120); });
-      }
-    });
-    // Llegan balanceándose cuando aparece la carpeta
-    ScrollTrigger.create({
-      trigger: anchors[3],
-      start: 'top 70%',
-      onEnter: function () {
-        tags.forEach(function (t, i) { setTimeout(function () { t._push((i % 2 ? -1 : 1) * 110); }, i * 90); });
-      }
-    });
-  }
   /* ---------- Cierre: las fotos de Instagram se abren en abanico ----- */
   if (!reduced) {
     gsap.from('.fan-card', {

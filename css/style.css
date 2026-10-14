@@ -148,7 +148,7 @@ html.lenis, html.lenis body { height: auto; }
   max-width: var(--maxw); margin-inline: auto;
   height: var(--nav-h);
   display: flex; align-items: center; gap: 12px;
-  padding: 0 11px 0 22px;
+  padding: 0 11px 0 24px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.92);
   -webkit-backdrop-filter: blur(16px);
@@ -159,7 +159,10 @@ html.lenis, html.lenis body { height: auto; }
 }
 .nav.scrolled .nav-bar { box-shadow: 0 18px 40px -18px rgba(80, 20, 50, 0.5); }
 .nav-logo { flex: none; display: block; }
-.logo-img { height: 44px; width: auto; }
+.nav-logo { padding-left: 6px; }
+/* El peso visual del logo (flor arriba, lema curvo abajo) queda sobre
+   el centro de su caja: se baja un poco para centrarlo a la vista. */
+.logo-img { height: 46px; width: auto; translate: 0 3px; }
 
 .nav-links { position: relative; margin-left: auto; display: flex; gap: 2px; }
 .nav-links a {
@@ -231,7 +234,7 @@ html.lenis, html.lenis body { height: auto; }
   text-align: center;
   font-family: var(--display);
   font-weight: 700;
-  font-size: min(9vw, 15svh);
+  font-size: min(9vw, 17svh);
   line-height: 0.98;
   letter-spacing: -0.045em;
   color: var(--blanco);
@@ -239,24 +242,11 @@ html.lenis, html.lenis body { height: auto; }
 }
 .slogan-line { display: block; white-space: nowrap; overflow: hidden; padding: 0.02em 0 0.1em; margin-bottom: -0.12em; }
 .slogan-in { display: inline-block; will-change: transform; }
-.slogan-flor {
-  display: inline-block;
-  width: 0.7em; height: 0.68em;
-  margin-right: 0.12em;
-  vertical-align: -0.02em;
-  fill: var(--amarillo);
-}
-
 /* Fotos flotantes en marco blanco */
 .float { position: absolute; z-index: 3; width: var(--w); }
 .float--a { --w: clamp(150px, 13.5vw, 230px); left: 1%;  top: -2%; }
 .float--b { --w: clamp(130px, 11.5vw, 196px); right: 3%; top: 4%; }
 .float--c { --w: clamp(170px, 15vw, 252px); right: 4%; top: 90%; }
-.f-drag { touch-action: auto; }
-@media (hover: hover) and (pointer: fine) {
-  .f-drag { cursor: grab; touch-action: none; }
-  .f-drag.is-grab { cursor: grabbing; }
-}
 .frame {
   padding: 8px;
   border-radius: 22px;
@@ -276,20 +266,6 @@ html.lenis, html.lenis body { height: auto; }
   pointer-events: none;
 }
 .frame--wide img { aspect-ratio: 5 / 4; }
-
-/* Sello con el isotipo (única aparición) */
-.seal {
-  position: absolute; z-index: 4;
-  left: 7%; top: 90%;
-  width: clamp(112px, 9.5vw, 150px); aspect-ratio: 1;
-  display: grid; place-items: center;
-  border-radius: 50%;
-  background: var(--blanco);
-  box-shadow: 0 20px 44px -20px rgba(110, 10, 70, 0.75);
-}
-.seal-ring { position: absolute; inset: 0; width: 100%; height: 100%; }
-.seal-ring text { font-family: var(--display); font-weight: 600; font-size: 15px; fill: var(--negro); }
-.seal-iso { width: 44%; height: auto; }
 
 .hero-copy {
   position: relative; z-index: 5;
@@ -314,34 +290,6 @@ html.lenis, html.lenis body { height: auto; }
 }
 .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 28px; }
 .actions--left { justify-content: flex-start; }
-
-/* ---------- Ticker amarillo ----------------------------------------- */
-.ticker {
-  position: relative; z-index: 1;
-  overflow: hidden;
-  background: var(--amarillo);
-  color: var(--negro);
-}
-.ticker-track { display: flex; width: max-content; will-change: transform; }
-.ticker-row {
-  display: flex; flex: none;
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: clamp(26px, 3.4vw, 50px);
-  line-height: 1;
-  letter-spacing: -0.035em;
-  white-space: nowrap;
-}
-.ticker-row li { display: flex; align-items: center; padding: 0.42em 0; }
-.ticker-row li::after {
-  content: "";
-  width: 0.6em; height: 0.58em;
-  margin: 0 0.55em;
-  background: var(--negro);
-  -webkit-mask: var(--flor-mask) center / contain no-repeat;
-  mask: var(--flor-mask) center / contain no-repeat;
-}
-:root { --flor-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 158 155'%3E%3Cpath d='M148.717 94.0866C140.69 86.1182 129.896 81.8144 119.016 79.4282C117.207 79.0447 115.397 78.6825 113.587 78.3629C116.185 76.6797 118.761 74.9753 121.316 73.2495C131.429 66.4103 143.607 59.2089 149.143 47.789C152.294 41.312 153.614 33.5993 150.889 26.6962C147.546 18.2165 140.052 12.4852 130.684 12.8048C117.015 13.3162 105.177 24.0117 97.3634 34.3663C94.553 38.0948 92.2962 42.1216 90.4652 46.3402C89.9542 42.3134 89.4219 38.3079 88.8045 34.3024C86.9522 22.1155 81.4378 9.28935 69.8981 3.36632C63.0212 -0.170447 54.6964 -1.4701 47.5427 2.06667C40.3037 5.64605 38.0469 13.6784 38.5366 21.178C39.3244 33.1519 43.2845 44.5718 49.4163 54.8625C49.5014 55.0117 49.6079 55.1395 49.693 55.2887C49.6079 55.2887 49.5014 55.246 49.4163 55.2247C37.3017 52.6893 23.8884 52.3271 13.0939 59.3368C7.49441 62.9588 2.51233 68.2 0.574855 74.7196C-0.638728 78.8103 -0.127746 83.7959 2.21426 87.3966C4.79046 91.3808 8.55896 93.1918 12.8384 94.7897C22.3129 98.3265 32.4261 100.351 42.518 101.118C37.4082 106.87 33.1074 113.304 30.0841 120.74C28.0614 125.726 26.6562 131.223 27.295 136.656C28.2531 144.752 32.7455 152.635 41.3257 154.531C49.2672 156.278 56.6765 152.678 63.3192 148.651C68.3226 145.604 73.0705 141.982 77.3925 138.041C84.1843 131.862 90.1032 124.405 94.6169 116.351C98.8964 120.442 103.495 124.192 108.52 127.579C119.655 135.079 134.495 141.194 147.12 133.268C153.806 129.071 158 121.997 157.957 114.008C157.894 106.487 153.891 99.2426 148.675 94.0653L148.717 94.0866Z'/%3E%3C/svg%3E"); }
 
 /* ---------- Fichero: mesa champagne con ondas rosa ------------------ */
 .cabinet {
@@ -542,7 +490,7 @@ html.lenis, html.lenis body { height: auto; }
   background: var(--blanco);
   box-shadow: 0 24px 44px -32px rgba(90, 60, 30, 0.55);
 }
-.serv-photo { aspect-ratio: 2 / 1; border-radius: 16px; overflow: hidden; }
+.serv-photo { aspect-ratio: 2.4 / 1; border-radius: 16px; overflow: hidden; }
 .serv-photo img { width: 100%; height: 100%; object-fit: cover; }
 .serv:first-child .serv-photo img { object-position: 50% 32%; }
 .serv:last-child .serv-photo img { object-position: 50% 62%; }
@@ -582,8 +530,8 @@ html.lenis, html.lenis body { height: auto; }
   text-wrap: balance;
 }
 .serv-body p:not(.serv-lead) { margin-top: 8px; font-size: 15px; line-height: 1.55; color: var(--texto); text-wrap: pretty; }
+.serv-body p:not(.serv-lead) { margin-bottom: 22px; }
 .serv-body .btn { align-self: flex-start; margin-top: auto; }
-.serv-body p + .btn { margin-top: 20px; }
 
 .includes {
   display: flex; flex-wrap: wrap; align-items: center; gap: 10px 26px;
@@ -594,44 +542,73 @@ html.lenis, html.lenis body { height: auto; }
 .includes li { display: inline-flex; align-items: center; gap: 9px; font-size: 14.5px; color: var(--texto); }
 .includes .dot { width: 7px; height: 7px; }
 
-/* Carpeta 4: Productos */
-.rack { position: relative; margin-top: clamp(24px, 3vw, 40px); padding-top: 6px; }
-.rack-rod {
-  position: absolute; top: 0; left: 1%; right: 1%;
-  height: 10px;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #3a3a3a, var(--negro));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 8px 16px -8px rgba(21, 21, 21, 0.6);
-}
-.tags {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: clamp(20px, 2.8vw, 44px);
-  padding-inline: clamp(0px, 2vw, 28px);
-}
-.tag { position: relative; padding-top: 44px; transform-origin: 50% 5px; rotate: var(--r, 0deg); }
-.tag-string {
-  position: absolute; top: 4px; left: 50%;
-  width: 2px; height: 58px; margin-left: -1px;
-  background: rgba(21, 21, 21, 0.55);
-}
-.tag-card {
+/* Carpeta 4: Productos. Carrusel del sitio en producción, mismo
+   comportamiento; el fondo de cada tarjeta es el de la carpeta y las
+   fotos se multiplican para que el blanco desaparezca. */
+.carousel {
   position: relative;
-  padding: 34px 16px 18px;
-  border-radius: 24px;
-  background: var(--blanco);
-  box-shadow: 0 26px 44px -28px rgba(120, 20, 80, 0.5), 0 1px 3px rgba(120, 20, 80, 0.08);
-  text-align: center;
-  -webkit-user-select: none; user-select: none;
+  margin-top: clamp(28px, 3.6vw, 56px);
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.4vw, 24px);
 }
-.tag-hole {
-  position: absolute; top: 12px; left: 50%;
-  width: 14px; height: 14px; margin-left: -7px;
-  border-radius: 50%;
+.carousel-btn {
+  flex: 0 0 auto;
+  width: clamp(30px, 3vw, 44px);
+  height: clamp(30px, 3vw, 44px);
+  display: grid;
+  place-items: center;
+  color: var(--rosa);
+  transition: transform 0.25s ease;
+}
+.carousel-btn svg { width: 100%; height: 100%; }
+.carousel-next svg { transform: rotate(180deg); }
+.carousel-btn:hover { transform: scale(1.15); }
+.carousel-btn:active { transform: scale(0.94); }
+.carousel-track {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc((100% - 2 * clamp(14px, 1.5vw, 23px)) / 3);
+  gap: clamp(14px, 1.5vw, 23px);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding-block: 4px;
+}
+.carousel-track::-webkit-scrollbar { display: none; }
+.carousel-track:focus-visible { outline: 3px solid var(--rosa); outline-offset: 6px; border-radius: 12px; }
+.product {
+  position: relative;
+  scroll-snap-align: start;
+  border-radius: 28px;
+  overflow: hidden;
   background: var(--rosa-20);
-  box-shadow: inset 0 1px 3px rgba(21, 21, 21, 0.35);
+  aspect-ratio: 452 / 481;
 }
-.tag-card img { width: 100%; aspect-ratio: 1; object-fit: contain; pointer-events: none; }
-.tag-card h3 { margin-top: 8px; font-family: var(--display); font-weight: 600; font-size: clamp(17px, 1.5vw, 21px); letter-spacing: -0.02em; }
+.product img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: clamp(8px, 1.1vw, 18px);
+  mix-blend-mode: multiply;
+}
+.product h3 {
+  position: absolute;
+  top: clamp(14px, 1.6vw, 26px);
+  left: clamp(14px, 1.8vw, 30px);
+  z-index: 2;
+  font-family: var(--display);
+  font-size: clamp(26px, 3vw, 46px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--rosa);
+}
 
 /* Carpeta 5: Cotizar */
 .quote { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: clamp(28px, 5vw, 80px); align-items: center; }
@@ -784,13 +761,19 @@ html.lenis, html.lenis body { height: auto; }
 @media (min-width: 768px) and (max-height: 760px) {
   .float--a { top: 0; }
   .float--b { top: 8%; --w: clamp(120px, 10vw, 170px); }
-  .seal { top: 96%; }
+  .serv-photo { aspect-ratio: 3.4 / 1; }
+  .serv-body { padding-top: 14px; }
+  .chips, .serv-lead { margin-top: 10px; }
+  .serv-body p:not(.serv-lead) { font-size: 14.5px; margin-bottom: 14px; }
+  .includes { margin-top: 14px; }
+  .carousel { max-width: calc((100svh - 330px) * 3.2); margin-inline: auto; }
 }
 
 @media (max-width: 1100px) {
   .nav-links a { padding: 9px 10px; font-size: 14px; }
   .folder-tab { font-size: 14px; }
   .steps { grid-template-columns: repeat(3, 1fr); }
+  .carousel-track { grid-auto-columns: calc((100% - clamp(14px, 1.5vw, 23px)) / 2); }
 }
 
 @media (max-width: 960px) {
@@ -816,26 +799,25 @@ html.lenis, html.lenis body { height: auto; }
   .about, .quote, .outro-inner { grid-template-columns: 1fr; }
   .pocket { height: 460px; }
   .servs { grid-template-columns: 1fr; }
-  .tags { grid-template-columns: repeat(2, 1fr); row-gap: 20px; }
-  .rack-rod, .tag-string, .tag-hole { display: none; }
-  .tag { padding-top: 0; }
   .fan { max-width: 520px; width: 100%; margin-inline: auto; }
 }
 
 @media (max-width: 767px) {
   :root { --nav-h: 58px; --nav-top: 10px; --tab-h: 42px; --tab-gap: 10px; }
-  .logo-img { height: 47px; }
+  .nav-logo { padding-left: 0; }
+  .logo-img { height: 46px; translate: none; }
   .nav-bar { padding: 0 7px 0 16px; gap: 6px; }
   .nav-cta { --h: 40px; padding: 0 14px; font-size: 13px; }
   .nav-toggle { width: 40px; height: 40px; }
   .nav-toggle span { left: 12px; right: 12px; }
 
   .hero { justify-content: flex-start; padding-top: calc(var(--nav-top) + var(--nav-h) + 30px); }
-  .slogan { font-size: 14.2vw; letter-spacing: -0.05em; }
+  .slogan { font-size: 10.4vw; letter-spacing: -0.05em; }
+  .carousel-track { grid-auto-columns: 100%; }
+  .carousel-btn { width: 26px; height: 26px; }
   .float--a { --w: 29vw; left: 0; top: 112%; }
   .float--b { --w: 25vw; left: 37.5%; right: auto; top: 120%; }
   .float--c { --w: 34vw; right: 0; top: 110%; }
-  .seal { display: none; }
   .cut--a { width: 60vw; left: -26vw; bottom: -24vw; }
   .cut--b { width: 34vw; right: -16vw; top: 12%; }
   .hero-copy { margin-top: 220px; }
@@ -869,6 +851,7 @@ html.lenis, html.lenis body { height: auto; }
   .loader-logo { animation: none; }
   .wa-ring { animation: none; }
   .btn-label > span, .doc, .fan-card { transition: none; }
+  .carousel-track { scroll-behavior: auto; }
 }
 @media (prefers-reduced-transparency: reduce) {
   .nav-bar { background: var(--blanco); -webkit-backdrop-filter: none; backdrop-filter: none; }
