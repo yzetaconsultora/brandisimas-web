@@ -3,65 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brandísimas — Stand de estampado en vivo para eventos</title>
-<meta name="description" content="Un stand donde cada invitado personaliza y estampa su propia prenda en vivo, en menos de 5 minutos. Cumpleaños, matrimonios, activaciones de marca y ferias.">
-<meta name="theme-color" content="#fe83c4">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<title>Brandísimas | Barra creativa de estampado en vivo para eventos</title>
+<meta name="description" content="Barra creativa: cada invitado elige su lienzo, arma su diseño y lo estampamos en vivo en menos de 5 minutos. Cumpleaños, matrimonios, activaciones de marca y ferias.">
+<meta name="theme-color" content="#EC5FB4">
+<link rel="icon" href="assets/favicon-32.png?v=20261014" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=20261014">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Brandísimas — Stand de estampado en vivo para eventos">
-<meta property="og:description" content="¿Un stand donde estampas tu propia prenda en vivo? Existe, y se llama Brandísimas.">
+<meta property="og:title" content="Brandísimas | Barra creativa, estampado en vivo">
+<meta property="og:description" content="Un recuerdo hecho por tus invitados, en tu celebración. Se ve, se vive, se estampa.">
 <meta property="og:image" content="assets/img/hero-main.webp">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- Sora + Manrope: diseño v3. Poppins 700: solo el carrusel de productos,
-     que se mantiene idéntico al del sitio anterior. -->
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Poppins:wght@700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+<!-- Manual de marca: Sora para titular, Manrope para leer -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 
-<!-- ?v= : subir este número en cada cambio de css/js. La zona de
-     Cloudflare impone 4h de caché de navegador y este es el modo de
-     saltarla mientras Browser Cache TTL no quede en "Respect Existing Headers". -->
-<link rel="stylesheet" href="css/style.css?v=20260930g">
+<link rel="preload" as="image" href="assets/img/hero-main.webp">
+<link rel="stylesheet" href="css/style.css?v=20261014e">
 </head>
 <body>
+<!--
+THESIS: Brandísimas es un fichero, no una landing. La portada es un afiche rosa con la consigna de la marca en tipografía gigante y fotos reales flotando encima; todo lo demás vive en carpetas con pestaña que se apilan al hacer scroll. Rechaza el hero partido texto/foto y las grillas de tarjetas iguales.
+OWN-WORLD: Manual de marca v1.0: rosa #EC5FB4, amarillo #F4B740, champagne #F5F1E8 como mesa, marfil, negro #151515. Sora para titular, Manrope para leer. Ondas de marca a gran escala saliendo del formato, curvas de recorte, flor e isotipo una vez. Píldoras 999px, cards 28px.
+STORY: Entiende qué es en un vistazo, recorre los cinco pasos del invitado, ve ambos servicios, los productos colgando como etiquetas y cotiza por WhatsApp.
+FIRST VIEWPORT: Consigna "Se ve, se vive, se estampa." centrada a todo el ancho sobre rosa con ondas blancas; tres fotos en marco blanco flotando, arrastrables; sello blanco con isotipo; titular sobre bloque amarillo y CTA amarillo centrados debajo.
+FORM: Dirección fijada por el brief del usuario + manual de marca; sin sorteo.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
 
-<!-- Loader -->
-<div class="loader" id="loader" aria-hidden="true">
-  <img src="assets/logo.png" alt="" class="loader-logo">
+<!-- Loader: se va solo por CSS aunque falle el JS -->
+<div class="loader" aria-hidden="true">
+  <img src="assets/logo.png?v=20261014" alt="" class="loader-logo" width="900" height="245">
 </div>
 
-<!-- Sprite: flor decorativa (una sola definición, se recolorea por CSS) -->
-<svg class="svg-sprite" aria-hidden="true" focusable="false">
+<svg class="sprite" aria-hidden="true" focusable="false">
   <symbol id="flor" viewBox="0 0 158 155">
     <path d="M148.717 94.0866C140.69 86.1182 129.896 81.8144 119.016 79.4282C117.207 79.0447 115.397 78.6825 113.587 78.3629C116.185 76.6797 118.761 74.9753 121.316 73.2495C131.429 66.4103 143.607 59.2089 149.143 47.789C152.294 41.312 153.614 33.5993 150.889 26.6962C147.546 18.2165 140.052 12.4852 130.684 12.8048C117.015 13.3162 105.177 24.0117 97.3634 34.3663C94.553 38.0948 92.2962 42.1216 90.4652 46.3402C89.9542 42.3134 89.4219 38.3079 88.8045 34.3024C86.9522 22.1155 81.4378 9.28935 69.8981 3.36632C63.0212 -0.170447 54.6964 -1.4701 47.5427 2.06667C40.3037 5.64605 38.0469 13.6784 38.5366 21.178C39.3244 33.1519 43.2845 44.5718 49.4163 54.8625C49.5014 55.0117 49.6079 55.1395 49.693 55.2887C49.6079 55.2887 49.5014 55.246 49.4163 55.2247C37.3017 52.6893 23.8884 52.3271 13.0939 59.3368C7.49441 62.9588 2.51233 68.2 0.574855 74.7196C-0.638728 78.8103 -0.127746 83.7959 2.21426 87.3966C4.79046 91.3808 8.55896 93.1918 12.8384 94.7897C22.3129 98.3265 32.4261 100.351 42.518 101.118C37.4082 106.87 33.1074 113.304 30.0841 120.74C28.0614 125.726 26.6562 131.223 27.295 136.656C28.2531 144.752 32.7455 152.635 41.3257 154.531C49.2672 156.278 56.6765 152.678 63.3192 148.651C68.3226 145.604 73.0705 141.982 77.3925 138.041C84.1843 131.862 90.1032 124.405 94.6169 116.351C98.8964 120.442 103.495 124.192 108.52 127.579C119.655 135.079 134.495 141.194 147.12 133.268C153.806 129.071 158 121.997 157.957 114.008C157.894 106.487 153.891 99.2426 148.675 94.0653L148.717 94.0866Z"/>
   </symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-ig" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.3" cy="6.7" r="1.2" fill="currentColor"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.79-1.47-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.38-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35M12.04 21.5h-.01a9.45 9.45 0 0 1-4.8-1.32l-.35-.2-3.57.94.95-3.48-.22-.36a9.42 9.42 0 0 1-1.45-5.04c0-5.2 4.25-9.44 9.47-9.44a9.4 9.4 0 0 1 6.69 2.77 9.35 9.35 0 0 1 2.77 6.68c0 5.2-4.25 9.45-9.48 9.45M20.5 3.49A11.8 11.8 0 0 0 12.04 0C5.5 0 .2 5.3.2 11.81c0 2.08.55 4.11 1.58 5.9L.1 24l6.45-1.69a11.9 11.9 0 0 0 5.49 1.39h.01c6.53 0 11.84-5.3 11.84-11.81 0-3.16-1.24-6.13-3.48-8.36"/></symbol>
 </svg>
 
 <!-- 1. Navbar -->
 <header class="nav" id="nav">
-  <div class="nav-inner">
-    <a class="nav-logo" href="#inicio" aria-label="Brandísimas — inicio">
-      <img src="assets/logo.png" alt="Brandísimas" class="logo-img">
+  <div class="nav-bar">
+    <a class="nav-logo" href="#inicio" aria-label="Brandísimas, ir al inicio">
+      <picture><source media="(max-width: 767px)" srcset="assets/isotipo-512.png" width="512" height="497"><img src="assets/logo.png?v=20261014" alt="Brandísimas" class="logo-img" width="900" height="245"></picture>
     </a>
-
     <nav class="nav-links" id="navLinks" aria-label="Navegación principal">
-      <a href="#inicio">Inicio</a>
-      <a href="#como-funciona">Cómo funciona</a>
-      <a href="#servicios">Servicios</a>
-      <a href="#productos">Productos</a>
-      <a class="btn btn-pink nav-cta-mobile" href="#cotizar">Cotiza tu evento</a>
+      <a href="#nosotros" data-nav="nosotros">Nosotros</a>
+      <a href="#como-funciona" data-nav="como-funciona">Cómo funciona</a>
+      <a href="#servicios" data-nav="servicios">Servicios</a>
+      <a href="#productos" data-nav="productos">Productos</a>
+      <span class="nav-ink" aria-hidden="true"></span>
     </nav>
-
-    <a class="btn btn-pink btn-sm nav-cta" href="#cotizar">Cotiza tu evento</a>
-
-    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navLinks">
-      <span></span><span></span><span></span>
+    <a class="btn btn--rosa btn--sm nav-cta" href="#cotizar" data-magnet>
+      <span class="btn-label"><span>Cotiza tu evento</span><span aria-hidden="true">Cotiza tu evento</span></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span>
     </button>
   </div>
 </header>
@@ -70,301 +76,294 @@
 
   <!-- 2. Hero -->
   <section class="hero" id="inicio">
-    <span class="flor flor-amber hero-flor-a" aria-hidden="true"><svg class="flor-svg"><use href="#flor"/></svg></span>
-    <span class="flor flor-pink hero-flor-b" aria-hidden="true"><svg class="flor-svg"><use href="#flor"/></svg></span>
+    <div class="hero-waves" aria-hidden="true"></div>
+    <span class="cut cut--a" aria-hidden="true"></span>
+    <span class="cut cut--b" aria-hidden="true"></span>
 
-    <div class="container hero-inner" data-fit>
-      <div class="hero-copy">
-        <div class="tags">
-          <span class="tag">Celebraciones</span>
-          <span class="tag">Empresas</span>
-        </div>
-        <h1>¿Un stand donde estampas tu propia prenda <span class="hl">en vivo?</span></h1>
-        <p class="hero-lead">Existe, y se llama <strong>Brandísimas</strong> cada invitado personaliza y estampa su prenda en menos de 5 minutos</p>
-        <div class="hero-actions">
-          <a class="btn btn-pink btn-lg" href="#cotizar">Cotiza tu evento <span aria-hidden="true">→</span></a>
-          <a class="btn btn-white btn-lg" href="#como-funciona">Ver cómo funciona</a>
-        </div>
+    <div class="hero-stage">
+      <p class="slogan" aria-hidden="true">
+        <span class="slogan-line"><span class="slogan-in">Se ve, se vive,</span></span>
+        <span class="slogan-line"><span class="slogan-in">se estampa.</span></span>
+      </p>
+
+      <!-- Fotos flotantes: capas = scroll > parallax > arrastre > flote -->
+      <div class="float float--a" data-depth="1.1">
+        <div class="f-par"><div class="f-drag"><div class="f-bob">
+          <figure class="frame"><div class="ph" style="--ar:0.830"><img data-frame="1.5356 0.63 -18.14" src="assets/img/hero-main.webp" alt="Invitada con su tote bag estampada en un campo de flores" width="1100" height="1608" decoding="async" draggable="false"></div></figure>
+        </div></div></div>
+      </div>
+      <div class="float float--b" data-depth="0.7">
+        <div class="f-par"><div class="f-drag"><div class="f-bob">
+          <figure class="frame"><div class="ph" style="--ar:1.181"><img data-frame="1.2198 10.99 12.49" src="assets/img/hero-people.webp" alt="Vaso de vidrio personalizado en manos de una invitada" width="800" height="1177" decoding="async" draggable="false"></div></figure>
+        </div></div></div>
+      </div>
+      <div class="float float--c" data-depth="1.4">
+        <div class="f-par"><div class="f-drag"><div class="f-bob">
+          <figure class="frame"><div class="ph" style="--ar:0.986"><img data-frame="1.6060 -8.23 -16.10" src="assets/img/hero-detail.webp" alt="Polera estampada con el diseño Tu evento aquí" width="1200" height="941" decoding="async" draggable="false"></div></figure>
+        </div></div></div>
       </div>
 
-      <div class="hero-collage">
-        <div class="hero-card hero-card--main">
-          <div class="hero-face" data-tilt><div class="ph"><img src="assets/img/hero-main.webp" data-frame="1.5356 0.63 -18.14" alt="Invitada con su tote bag estampada en un campo de flores" width="1100" height="1608" decoding="async"></div></div>
-        </div>
-        <div class="hero-card hero-card--detail">
-          <div class="hero-face" data-tilt><div class="ph"><img src="assets/img/hero-detail.webp" data-frame="1.6060 -8.23 -16.10" alt="Detalle de una polera estampada con diseño Tu evento aquí" width="1200" height="941" decoding="async"></div></div>
-        </div>
-        <div class="hero-card hero-card--people">
-          <div class="hero-face" data-tilt><div class="ph"><img src="assets/img/hero-people.webp" data-frame="1.2198 10.99 12.49" alt="Vaso de vidrio personalizado en manos de una invitada" width="800" height="1177" decoding="async"></div></div>
-        </div>
-        <span class="hero-sticker-flor" aria-hidden="true"><svg class="flor-svg"><use href="#flor"/></svg></span>
+    </div>
+
+    <div class="hero-copy">
+      <h1><span class="mark">Un recuerdo hecho por tus invitados, en tu celebración.</span></h1>
+      <p>Barra creativa: tus invitados eligen su lienzo, arman su diseño y lo estampamos en vivo, en menos de 5 minutos.</p>
+      <div class="actions">
+        <a class="btn btn--amarillo btn--lg" href="#cotizar" data-magnet>
+          <span class="btn-label"><span>Cotiza tu evento</span><span aria-hidden="true">Cotiza tu evento</span></span>
+          <svg class="btn-ico"><use href="#i-arrow"/></svg>
+        </a>
+        <a class="btn btn--negro-line btn--lg" href="#como-funciona">
+          <span class="btn-label"><span>Ver cómo funciona</span><span aria-hidden="true">Ver cómo funciona</span></span>
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- 3. De qué se trata -->
-  <section class="about">
-    <div class="container about-inner" data-fit>
-      <div class="about-media">
-        <div class="about-photo" data-tilt>
-          <div class="ph"><img src="assets/img/about-stand.webp" data-frame="1.2545 -11.77 -10.61" alt="Mesa del stand Brandísimas con estampados y tote bags" width="1300" height="1951" loading="lazy" decoding="async"></div>
+  <!-- 3. Fichero: cada sección es una carpeta con pestaña -->
+  <div class="cabinet" id="cabinet">
+
+    <!-- Carpeta 1: Nosotros -->
+    <div class="anchor" id="nosotros"></div>
+    <section class="folder folder--blanco" style="--i:0" aria-labelledby="t-nosotros">
+      <a class="folder-tab" href="#nosotros">Nosotros</a>
+      <div class="folder-sheet">
+        <div class="about">
+          <div class="about-copy">
+            <h2 class="h2" id="t-nosotros">No vendemos souvenir. Vendemos una <span class="mark">experiencia creativa.</span></h2>
+            <p class="lead">Un espacio pensado para convertir cualquier evento en una experiencia única. Más que un stand: un momento que tus invitados van a recordar, fotografiar y contar, mientras tú te olvidas de la logística.</p>
+            <ul class="facts">
+              <li><span class="dot" aria-hidden="true"></span><span>Diseñamos los estampados en base a tu temática o línea gráfica</span></li>
+              <li><span class="dot" aria-hidden="true"></span><span>En menos de 5 minutos, en vivo</span></li>
+              <li><span class="dot" aria-hidden="true"></span><span>Un recuerdo único, creado por ellos</span></li>
+            </ul>
+          </div>
+          <div class="pocket">
+            <div class="doc doc--about" data-pull>
+              <div class="ph" style="--ar:0.800"><img data-frame="1.2545 -11.77 -10.61" src="assets/img/about-stand.webp" alt="Mesa del stand Brandísimas con estampados y tote bags" width="1300" height="1951" decoding="async"></div>
+            </div>
+            <div class="pocket-flap" aria-hidden="true"></div>
+          </div>
         </div>
-        <span class="flor flor-pink about-flor" aria-hidden="true"><svg class="flor-svg"><use href="#flor"/></svg></span>
       </div>
+    </section>
 
-      <div class="about-copy">
-        <span class="eyebrow">Brandísimas</span>
-        <h2 class="h2">¿De qué se trata?</h2>
-        <p class="lead">Un espacio pensado para convertir cualquier evento en una experiencia única. Más que un stand: un momento del evento que tus invitados van a recordar, fotografiar y contar, mientras tú te olvidas de la logística</p>
-        <ul class="about-list">
-          <li class="about-item about-item--pink"><svg class="flor-ico flor-ico--pink" aria-hidden="true"><use href="#flor"/></svg><span>Diseñamos en base a tu temática o línea gráfica los estampados</span></li>
-          <li class="about-item about-item--amber"><svg class="flor-ico flor-ico--amber" aria-hidden="true"><use href="#flor"/></svg><span>En menos de 5 minutos, en vivo</span></li>
-          <li class="about-item about-item--cream"><svg class="flor-ico flor-ico--pink" aria-hidden="true"><use href="#flor"/></svg><span>Un recuerdo único creado por ellos.</span></li>
-        </ul>
+    <!-- Carpeta 2: Cómo funciona (recorrido del invitado, manual cap. 14) -->
+    <div class="anchor" id="como-funciona"></div>
+    <section class="folder folder--rosa" style="--i:1" aria-labelledby="t-como">
+      <a class="folder-tab" href="#como-funciona">Cómo funciona</a>
+      <div class="folder-sheet">
+        <div class="steps-head">
+          <h2 class="h2" id="t-como">¿Cómo funciona?</h2>
+          <p class="lead">Cinco pasos, menos de cinco minutos.</p>
+        </div>
+        <div class="steps-docs" aria-hidden="true">
+          <div class="doc doc--step" data-pull style="--r:-2deg"><div class="ph" style="--ar:1.333"><img data-frame="1.4437 16.17 4.09" src="assets/img/paso-1-eligen.webp" alt="" width="1400" height="933" decoding="async"></div></div>
+          <div class="doc doc--step" data-pull style="--r:1.5deg"><div class="ph" style="--ar:1.333"><img data-frame="1.3240 7.85 -16.20" src="assets/img/paso-2-estampamos.webp" alt="" width="1400" height="933" decoding="async"></div></div>
+          <div class="doc doc--step" data-pull style="--r:-1deg"><div class="ph" style="--ar:1.333"><img data-frame="1.3987 9.84 -1.84" src="assets/img/paso-3-sellollevan.webp" alt="" width="1400" height="933" decoding="async"></div></div>
+        </div>
+        <ol class="steps">
+          <li class="step"><span class="bubble">1</span><h3>Elige tu lienzo</h3><p>Tote bag, polera, vaso de vidrio u otro producto del evento.</p></li>
+          <li class="step"><span class="bubble">2</span><h3>Elige tus diseños</h3><p>Explora el exhibidor y combina los parches que más te representen.</p></li>
+          <li class="step"><span class="bubble">3</span><h3>Decora</h3><p>Arma tu composición sobre el producto antes de estampar.</p></li>
+          <li class="step"><span class="bubble">4</span><h3>Estampamos</h3><p>Nuestro equipo aplica tu diseño en vivo, en menos de cinco minutos.</p></li>
+          <li class="step"><span class="bubble">5</span><h3>Te entregamos</h3><p>Recibe tu creación terminada, con etiqueta y packaging de marca.</p></li>
+        </ol>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- 4. Cómo funciona -->
-  <section class="steps" id="como-funciona">
-    <span class="flor flor-white steps-flor" aria-hidden="true"><svg class="flor-svg"><use href="#flor"/></svg></span>
-    <div class="container" data-fit>
-      <h2 class="h2">¿Cómo funciona?</h2>
-
-      <ol class="steps-grid">
-        <li class="step">
-          <div class="step-media"><div class="step-photo" data-tilt>
-            <div class="ph"><img src="assets/img/paso-1-eligen.webp?v=2" data-frame="1.4437 16.17 4.09" alt="Invitada eligiendo parches en la mesa de estampados" width="1400" height="933" loading="lazy" decoding="async"></div>
-          </div></div>
-          <div class="step-head">
-            <span class="step-num"><svg class="flor-ico flor-ico--pink" aria-hidden="true"><use href="#flor"/></svg><span>1</span></span>
-            <h3>Eligen</h3>
+    <!-- Carpeta 3: Servicios -->
+    <div class="anchor" id="servicios"></div>
+    <section class="folder folder--marfil" style="--i:2" aria-labelledby="t-serv">
+      <a class="folder-tab" href="#servicios">Servicios</a>
+      <div class="folder-sheet">
+        <div class="serv-layout">
+          <div class="serv-side">
+            <h2 class="h2" id="t-serv">Nuestros servicios</h2>
+            <div class="includes" aria-label="Siempre incluye">
+              <span class="includes-title">Siempre incluye</span>
+              <ul>
+                <li><span class="dot" aria-hidden="true"></span>Mesa de estampados</li>
+                <li><span class="dot" aria-hidden="true"></span>Selección de estampados</li>
+                <li><span class="dot" aria-hidden="true"></span>Estación de estampados</li>
+                <li><span class="dot" aria-hidden="true"></span>Exhibición de productos</li>
+                <li><span class="dot" aria-hidden="true"></span>Personal especializado</li>
+              </ul>
+            </div>
           </div>
-          <p>Cada invitado escoge su prenda y el estampado que más le gusta, entre diseños creados especialmente para tu evento.</p>
-        </li>
+          <div class="servs">
+            <article class="serv">
+              <div class="serv-photo"><div class="ph" style="--ar:1.6"><img data-frame="1 0 0" src="assets/img/svc-celebraciones.webp" alt="Dos amigas soplando confeti en una celebración" width="1300" height="1887" loading="lazy" decoding="async"></div></div>
+              <div class="serv-body">
+                <h3>Celebraciones <span class="serv-tag">Familias</span></h3>
+                <ul class="chips"><li>Cumpleaños</li><li>Matrimonios</li><li>Baby shower</li><li>Graduaciones</li></ul>
+                <p class="serv-lead">Un recuerdo que tus invitados crean con sus propias manos.</p>
+                <p>Nadie se va con un souvenir más que termina en un cajón: cada invitado se lleva una prenda que diseñó y estampó él mismo, con la temática de tu fiesta. Llevamos el stand, lo montamos y lo atendemos, con productos según la cantidad de invitados, para que tú solo disfrutes.</p>
+                <a class="btn btn--rosa" href="#cotizar" data-pick="Celebración" data-magnet>
+                  <span class="btn-label"><span>Cotiza tu celebración</span><span aria-hidden="true">Cotiza tu celebración</span></span>
+                  <svg class="btn-ico"><use href="#i-arrow"/></svg>
+                </a>
+              </div>
+            </article>
 
-        <li class="step">
-          <div class="step-media"><div class="step-photo" data-tilt>
-            <div class="ph"><img src="assets/img/paso-2-estampamos.webp?v=2" data-frame="1.3240 7.85 -16.20" alt="Estampado de una tote bag en vivo durante el evento" width="1400" height="933" loading="lazy" decoding="async"></div>
-          </div></div>
-          <div class="step-head">
-            <span class="step-num"><svg class="flor-ico flor-ico--amber" aria-hidden="true"><use href="#flor"/></svg><span>2</span></span>
-            <h3>Estampamos</h3>
+            <article class="serv">
+              <div class="serv-photo"><div class="ph" style="--ar:1.6"><img data-frame="1 0 0" src="assets/img/svc-empresas.webp" alt="Auditorio lleno durante un evento corporativo" width="1300" height="1300" loading="lazy" decoding="async"></div></div>
+              <div class="serv-body">
+                <h3>Empresas <span class="serv-tag serv-tag--amarillo">Corporativo</span></h3>
+                <ul class="chips"><li>Activaciones</li><li>Lanzamientos</li><li>Ferias, eventos</li><li>Team building</li></ul>
+                <p class="serv-lead">Una activación que tu público se lleva puesta.</p>
+                <p>Tu marca deja de ser un logo en un pendón y pasa a ser algo que la gente elige, crea y usa. El stand genera fila, conversación y contenido para redes, y cada producto sigue mostrando tu marca semanas después del evento.</p>
+                <a class="btn btn--rosa" href="#cotizar" data-pick="Empresa" data-magnet>
+                  <span class="btn-label"><span>Cotiza para tu empresa</span><span aria-hidden="true">Cotiza para tu empresa</span></span>
+                  <svg class="btn-ico"><use href="#i-arrow"/></svg>
+                </a>
+              </div>
+            </article>
           </div>
-          <p>Nuestro equipo lo guía y estampa en vivo frente a él. No necesita experiencia: solo ganas de crear.</p>
-        </li>
-
-        <li class="step">
-          <div class="step-media"><div class="step-photo" data-tilt>
-            <div class="ph"><img src="assets/img/paso-3-sellollevan.webp?v=2" data-frame="1.3987 9.84 -1.84" alt="Invitada recibiendo su tote bag personalizada" width="1400" height="933" loading="lazy" decoding="async"></div>
-          </div></div>
-          <div class="step-head">
-            <span class="step-num"><svg class="flor-ico flor-ico--pink" aria-hidden="true"><use href="#flor"/></svg><span>3</span></span>
-            <h3>Se lo llevan</h3>
-          </div>
-          <p>En menos de 5 minutos tiene en sus manos una pieza única, hecha a su gusto, que va a seguir usando mucho después del evento.</p>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- 5. Servicios -->
-  <section class="services" id="servicios">
-    <span class="flor flor-blush services-flor" aria-hidden="true"><svg class="flor-svg"><use href="#flor"/></svg></span>
-    <div class="container" data-fit data-fit-min="0.3" data-fit-keep-width>
-      <div class="section-head section-head--center">
-        <span class="eyebrow">Servicios</span>
-        <h2 class="h2">Nuestros servicios</h2>
+        </div>
       </div>
+    </section>
 
-      <div class="services-grid">
-        <aside class="includes-card" aria-label="Siempre incluye" data-fit-side>
-          <div class="includes-head">
-            <span class="eyebrow">Siempre incluye</span>
-            <span class="includes-title">Todo listo para que solo disfrutes.</span>
-          </div>
-          <ul class="includes-list">
-            <li><svg class="flor-ico flor-ico--pink" aria-hidden="true"><use href="#flor"/></svg>Mesa de estampados</li>
-            <li><svg class="flor-ico flor-ico--amber" aria-hidden="true"><use href="#flor"/></svg>Selección de estampados</li>
-            <li><svg class="flor-ico flor-ico--pink" aria-hidden="true"><use href="#flor"/></svg>Estación de estampados</li>
-            <li><svg class="flor-ico flor-ico--amber" aria-hidden="true"><use href="#flor"/></svg>Exhibición de productos</li>
-            <li><svg class="flor-ico flor-ico--pink" aria-hidden="true"><use href="#flor"/></svg>Personal especializado</li>
+    <!-- Carpeta 4: Productos, colgando como etiquetas -->
+    <div class="anchor" id="productos"></div>
+    <section class="folder folder--rosa-suave" style="--i:3" aria-labelledby="t-prod">
+      <a class="folder-tab" href="#productos">Productos</a>
+      <div class="folder-sheet">
+        <h2 class="h2 h2--center" id="t-prod">¿Qué pueden personalizar?</h2>
+        <div class="carousel">
+          <button class="carousel-btn carousel-prev" id="prodPrev" aria-label="Producto anterior" aria-controls="prodTrack">
+            <svg viewBox="0 0 38.8793 59.0002" aria-hidden="true"><path d="M33.8791 5.00016L7.37909 26.5002L33.8791 54.0002" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg>
+          </button>
+
+          <ul class="carousel-track" id="prodTrack" tabindex="0" aria-label="Productos personalizables">
+            <li class="product">
+              <h3>Tote<br>bags</h3>
+              <img src="assets/img/prod-tote-bag.webp?v=20261014" alt="Tote bag de algodón crudo" width="900" height="1187" loading="lazy" decoding="async">
+            </li>
+            <li class="product">
+              <h3>Bucket hat</h3>
+              <img src="assets/img/prod-bucket-hat.webp?v=20261014" alt="Bucket hat color crudo" width="900" height="750" loading="lazy" decoding="async">
+            </li>
+            <li class="product">
+              <h3>Vasos</h3>
+              <img src="assets/img/prod-vasos.webp?v=20261014" alt="Vaso de vidrio con tapa de bambú y bombilla" width="900" height="1187" loading="lazy" decoding="async">
+            </li>
+            <li class="product">
+              <h3>Poleras</h3>
+              <img src="assets/img/prod-poleras.webp?v=20261014" alt="Polera oversize color crudo" width="900" height="1187" loading="lazy" decoding="async">
+            </li>
           </ul>
+
+          <button class="carousel-btn carousel-next" id="prodNext" aria-label="Producto siguiente" aria-controls="prodTrack">
+            <svg viewBox="0 0 38.8793 59.0002" aria-hidden="true"><path d="M33.8791 5.00016L7.37909 26.5002L33.8791 54.0002" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <aside class="stock-ad" aria-label="Otros productos">
+          <p><strong>Cotiza por stock y otros productos.</strong> <span>¿Necesitas más unidades o un producto que no ves aquí? Escríbenos y lo vemos.</span></p>
+          <a class="btn btn--rosa btn--sm" href="#cotizar" data-magnet>
+            <span class="btn-label"><span>Consultar stock</span><span aria-hidden="true">Consultar stock</span></span>
+            <svg class="btn-ico"><use href="#i-arrow"/></svg>
+          </a>
         </aside>
+      </div>
+    </section>
 
-        <article class="service">
-          <div class="service-media"><div class="service-photo">
-            <div class="ph"><img src="assets/img/svc-celebraciones.webp" data-frame="1 0 0" alt="Dos amigas soplando confeti en una celebración" width="1300" height="1887" loading="lazy" decoding="async"></div>
-          </div></div>
-          <div class="service-body">
-            <div class="service-top">
-              <h3>Celebraciones</h3>
-              <span class="badge badge--pink">Familias</span>
-            </div>
-            <ul class="chips chips--pink">
-              <li>Cumpleaños</li>
-              <li>Matrimonios</li>
-              <li>Baby Shower</li>
-              <li>Graduaciones</li>
+    <!-- Carpeta 5: Cotizar -->
+    <div class="anchor" id="cotizar"></div>
+    <section class="folder folder--amarillo" style="--i:4" aria-labelledby="t-cot">
+      <a class="folder-tab" href="#cotizar">Cotiza</a>
+      <div class="folder-sheet">
+        <div class="quote">
+          <div class="quote-copy">
+            <h2 class="h2" id="t-cot">Cuéntanos de tu evento</h2>
+            <p class="lead">Completa el formulario y te enviamos una propuesta a la medida de tu evento, tu número de invitados y los productos que prefieras.</p>
+            <ul class="quote-points">
+              <li><span class="dot" aria-hidden="true"></span>Sin compromiso</li>
+              <li><span class="dot" aria-hidden="true"></span>Diseños según tu temática o marca</li>
+              <li><span class="dot" aria-hidden="true"></span>Respuesta por WhatsApp</li>
             </ul>
-            <div class="service-text">
-              <p class="service-lead">Un recuerdo que tus invitados crean con sus propias manos.</p>
-              <p>Nadie se va con un souvenir más que termina en un cajón: cada invitado se lleva una prenda que diseñó y estampó él mismo, con la temática de tu fiesta. Es el rincón donde se juntan grandes y chicos, y el que aparece en todas las fotos. Llevamos el stand, lo montamos y lo atendemos, con productos según la cantidad de invitados, para que tú solo disfrutes.</p>
-            </div>
-            <a class="btn btn-pink service-btn" href="#cotizar" data-pick="Celebración">Cotiza tu celebración →</a>
-          </div>
-        </article>
-
-        <article class="service">
-          <div class="service-media"><div class="service-photo">
-            <div class="ph"><img src="assets/img/svc-empresas.webp" data-frame="1 0 0" alt="Auditorio lleno durante un evento corporativo" width="1300" height="1300" loading="lazy" decoding="async"></div>
-          </div></div>
-          <div class="service-body">
-            <div class="service-top">
-              <h3>Empresas</h3>
-              <span class="badge badge--cream">Corporativo</span>
-            </div>
-            <ul class="chips chips--cream">
-              <li>Activaciones</li>
-              <li>Lanzamientos</li>
-              <li>Ferias, eventos</li>
-              <li>Team building</li>
-            </ul>
-            <div class="service-text">
-              <p class="service-lead">Una activación que tu público se lleva puesta.</p>
-              <p>Tu marca deja de ser un logo en un pendón y pasa a ser algo que la gente elige, crea y usa. El stand genera fila, conversación y contenido para redes, y cada producto sigue mostrando tu marca semanas después del evento. Adaptamos el volumen de productos y el branding al tamaño de tu evento.</p>
-            </div>
-            <a class="btn btn-pink service-btn" href="#cotizar" data-pick="Empresa">Cotiza tu evento →</a>
-          </div>
-        </article>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- 6. Productos — carrusel idéntico al del sitio anterior -->
-  <section class="products" id="productos">
-    <div class="container">
-      <div class="section-head">
-        <span class="eyebrow">Productos</span>
-        <h2 class="h2">¿Qué pueden personalizar?</h2>
-      </div>
-
-      <div class="carousel">
-        <button class="carousel-btn carousel-prev" id="prodPrev" aria-label="Producto anterior" aria-controls="prodTrack">
-          <svg viewBox="0 0 38.8793 59.0002" aria-hidden="true"><path d="M33.8791 5.00016L7.37909 26.5002L33.8791 54.0002" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg>
-        </button>
-
-        <ul class="carousel-track" id="prodTrack" tabindex="0" aria-label="Productos personalizables">
-          <li class="product">
-            <h3>Tote<br>bags</h3>
-            <img src="assets/img/prod-tote-bag.webp" alt="Tote bag de algodón crudo" width="900" height="1187" loading="lazy" decoding="async">
-          </li>
-          <li class="product">
-            <h3>Bucket hat</h3>
-            <img src="assets/img/prod-bucket-hat.webp" alt="Bucket hat color crudo" width="900" height="750" loading="lazy" decoding="async">
-          </li>
-          <li class="product">
-            <h3>Vasos</h3>
-            <img src="assets/img/prod-vasos.webp" alt="Vaso de vidrio con tapa de bambú y bombilla" width="900" height="1187" loading="lazy" decoding="async">
-          </li>
-          <li class="product">
-            <h3>Poleras</h3>
-            <img src="assets/img/prod-poleras.webp" alt="Polera oversize color crudo" width="900" height="1187" loading="lazy" decoding="async">
-          </li>
-        </ul>
-
-        <button class="carousel-btn carousel-next" id="prodNext" aria-label="Producto siguiente" aria-controls="prodTrack">
-          <svg viewBox="0 0 38.8793 59.0002" aria-hidden="true"><path d="M33.8791 5.00016L7.37909 26.5002L33.8791 54.0002" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- 7. Cotizar -->
-  <section class="quote" id="cotizar">
-    <span class="flor flor-pink quote-flor" aria-hidden="true"><svg class="flor-svg"><use href="#flor"/></svg></span>
-    <div class="container quote-inner" data-fit>
-      <div class="quote-copy">
-        <span class="eyebrow">Cotiza</span>
-        <h2 class="h2">Cuéntanos de tu evento</h2>
-        <p class="lead">Completa el formulario y te enviamos una propuesta a la medida de tu evento, tu número de invitados y los productos que prefieras.</p>
-        <ul class="quote-points">
-          <li><svg class="flor-ico flor-ico--pink" aria-hidden="true"><use href="#flor"/></svg>Sin compromiso</li>
-          <li><svg class="flor-ico flor-ico--amber" aria-hidden="true"><use href="#flor"/></svg>Diseños según tu temática o marca</li>
-        </ul>
-      </div>
-
-      <div class="quote-card">
-        <!-- Sin backend: al enviar se arma el mensaje y se abre WhatsApp -->
-        <form class="quote-form" id="quoteForm" novalidate>
-          <fieldset class="field">
-            <legend class="field-label">Tipo de evento</legend>
-            <div class="toggle-row" id="tipoRow">
-              <button type="button" class="toggle is-on" data-tipo="Celebración" aria-pressed="true">Celebración</button>
-              <button type="button" class="toggle" data-tipo="Empresa" aria-pressed="false">Empresa</button>
-            </div>
-          </fieldset>
-
-          <div class="fields-grid">
-            <label class="field">Nombre<input name="nombre" required placeholder="Tu nombre" autocomplete="name"></label>
-            <label class="field"><span id="orgLabel">Tipo de celebración</span><input name="org" id="orgInput" placeholder="Cumpleaños, matrimonio…"></label>
-            <label class="field">Email<input name="email" type="email" required placeholder="tu@correo.cl" autocomplete="email"></label>
-            <label class="field">Teléfono<input name="telefono" type="tel" placeholder="+56 9 1234 5678" autocomplete="tel"></label>
-            <label class="field">Fecha del evento<input name="fecha" type="date"></label>
-            <label class="field">Invitados<select name="invitados" required><option value="">Selecciona</option><option>Menos de 50</option><option>50 a 100</option><option>100 a 200</option><option>Más de 200</option></select></label>
           </div>
 
-          <fieldset class="field">
-            <legend class="field-label">¿Qué productos te interesan?</legend>
-            <div class="toggle-row" id="prodRow">
-              <button type="button" class="toggle toggle--sm" data-prod="Tote bags" aria-pressed="false">Tote bags</button>
-              <button type="button" class="toggle toggle--sm" data-prod="Bucket hat" aria-pressed="false">Bucket hat</button>
-              <button type="button" class="toggle toggle--sm" data-prod="Vasos" aria-pressed="false">Vasos</button>
-              <button type="button" class="toggle toggle--sm" data-prod="Poleras" aria-pressed="false">Poleras</button>
+          <div class="quote-sheet">
+            <!-- Sin backend: al enviar se arma el mensaje y se abre WhatsApp -->
+            <form class="form" id="quoteForm" novalidate>
+              <fieldset class="field">
+                <legend class="label">Tipo de evento</legend>
+                <div class="toggles" id="tipoRow">
+                  <button type="button" class="toggle is-on" data-tipo="Celebración" aria-pressed="true">Celebración</button>
+                  <button type="button" class="toggle" data-tipo="Empresa" aria-pressed="false">Empresa</button>
+                </div>
+              </fieldset>
+
+              <div class="fields">
+                <label class="field"><span class="label">Nombre</span><input name="nombre" required placeholder="Tu nombre" autocomplete="name"></label>
+                <label class="field"><span class="label" id="orgLabel">Tipo de celebración</span><input name="org" id="orgInput" placeholder="Cumpleaños, matrimonio…"></label>
+                <label class="field"><span class="label">Email</span><input name="email" type="email" required placeholder="tu@correo.cl" autocomplete="email"></label>
+                <label class="field"><span class="label">Teléfono</span><input name="telefono" type="tel" placeholder="+56 9 1234 5678" autocomplete="tel"></label>
+                <label class="field"><span class="label">Fecha del evento</span><input name="fecha" type="date"></label>
+                <label class="field"><span class="label">Invitados</span><select name="invitados" required><option value="">Selecciona</option><option>Menos de 50</option><option>50 a 100</option><option>100 a 200</option><option>Más de 200</option></select></label>
+              </div>
+
+              <fieldset class="field">
+                <legend class="label">¿Qué productos te interesan?</legend>
+                <div class="toggles" id="prodRow">
+                  <button type="button" class="toggle toggle--sm" data-prod="Tote bags" aria-pressed="false">Tote bags</button>
+                  <button type="button" class="toggle toggle--sm" data-prod="Bucket hat" aria-pressed="false">Bucket hat</button>
+                  <button type="button" class="toggle toggle--sm" data-prod="Vasos" aria-pressed="false">Vasos</button>
+                  <button type="button" class="toggle toggle--sm" data-prod="Poleras" aria-pressed="false">Poleras</button>
+                </div>
+              </fieldset>
+
+              <label class="field"><span class="label">Cuéntanos más</span><textarea name="mensaje" rows="2" placeholder="Temática, lugar, ideas…"></textarea></label>
+
+              <p class="form-error" id="formError" role="alert" hidden></p>
+              <button type="submit" class="btn btn--rosa btn--lg btn--block">
+                <span class="btn-label"><span>Enviar cotización</span><span aria-hidden="true">Enviar cotización</span></span>
+                <svg class="btn-ico"><use href="#i-arrow"/></svg>
+              </button>
+            </form>
+
+            <div class="done" id="quoteDone" hidden>
+              <svg class="done-flor" aria-hidden="true"><use href="#flor"/></svg>
+              <h3>¡Gracias, <span id="doneName"></span>!</h3>
+              <p>Abrimos WhatsApp con tu solicitud para <span id="doneSummary"></span>. Envía el mensaje y te contactaremos pronto con una propuesta para tu evento.</p>
+              <div class="done-actions">
+                <a class="btn btn--rosa" id="doneWa" href="#" target="_blank" rel="noopener"><span class="btn-label"><span>Abrir WhatsApp de nuevo</span><span aria-hidden="true">Abrir WhatsApp de nuevo</span></span></a>
+                <button type="button" class="btn btn--rosa-line" id="quoteReset"><span class="btn-label"><span>Enviar otra cotización</span><span aria-hidden="true">Enviar otra cotización</span></span></button>
+              </div>
             </div>
-          </fieldset>
-
-          <label class="field">Cuéntanos más<textarea name="mensaje" rows="3" placeholder="Temática, lugar, ideas…"></textarea></label>
-
-          <p class="form-error" id="formError" role="alert" hidden></p>
-          <button type="submit" class="btn btn-pink btn-lg quote-submit">Enviar cotización →</button>
-        </form>
-
-        <div class="quote-done" id="quoteDone" hidden>
-          <svg class="flor-ico flor-ico--pink quote-done-flor" aria-hidden="true"><use href="#flor"/></svg>
-          <h3>¡Gracias, <span id="doneName"></span>!</h3>
-          <p>Abrimos WhatsApp con tu solicitud para <span id="doneSummary"></span>. Envía el mensaje y te contactaremos pronto con una propuesta para tu evento.</p>
-          <div class="quote-done-actions">
-            <a class="btn btn-pink" id="doneWa" href="#" target="_blank" rel="noopener">Abrir WhatsApp de nuevo</a>
-            <button type="button" class="btn btn-blush" id="quoteReset">Enviar otra cotización</button>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
-  <!-- 8. CTA / Instagram -->
-  <section class="cta" id="contacto">
-    <div class="cta-box" data-fit>
-      <span class="flor flor-pink cta-flor" aria-hidden="true"><svg class="flor-svg"><use href="#flor"/></svg></span>
-      <div class="cta-copy">
-        <h2 class="slogan">Se ve,<br>Se vive,<br>Se estampa.</h2>
-        <p>Haz que tus invitados vivan la experiencia de estampar su propia pieza y se lleven algo que realmente quieran conservar.</p>
-        <div class="cta-actions">
-          <a class="btn btn-pinkdeep btn-lg" href="#cotizar">Cotiza tu evento →</a>
-          <a class="btn btn-white btn-lg" href="https://www.instagram.com/brandisimas.cl" target="_blank" rel="noopener" data-ig>Ver en instagram</a>
+  <!-- 5. Cierre: Instagram -->
+  <section class="outro" id="contacto">
+    <div class="outro-inner">
+      <div class="outro-copy">
+        <h2 class="outro-title">Que se lleven algo que <span class="mark">quieran conservar.</span></h2>
+        <p>Haz que tus invitados vivan la experiencia de estampar su propia pieza. Mira lo que hemos hecho en Instagram.</p>
+        <div class="actions actions--left">
+          <a class="btn btn--rosa btn--lg" href="#cotizar" data-magnet>
+            <span class="btn-label"><span>Cotiza tu evento</span><span aria-hidden="true">Cotiza tu evento</span></span>
+            <svg class="btn-ico"><use href="#i-arrow"/></svg>
+          </a>
+          <a class="btn btn--rosa-line btn--lg" href="https://www.instagram.com/brandisimas.cl" target="_blank" rel="noopener" data-ig>
+            <svg class="btn-ico btn-ico--lead"><use href="#i-ig"/></svg>
+            <span class="btn-label"><span>@brandisimas.cl</span><span aria-hidden="true">@brandisimas.cl</span></span>
+          </a>
         </div>
       </div>
-      <div class="cta-grid">
-        <a class="ig-tile ig-tile--tall" href="https://www.instagram.com/brandisimas.cl" target="_blank" rel="noopener" data-ig aria-label="Ver en Instagram: tote bag Hot girls love Brandísimas">
-          <div class="ph"><img src="assets/img/ig-1.webp" data-frame="1 0 0" alt="" width="900" height="1125" loading="lazy" decoding="async"></div>
+      <div class="fan">
+        <a class="fan-card fan-card--1" href="https://www.instagram.com/brandisimas.cl" target="_blank" rel="noopener" data-ig aria-label="Ver en Instagram: tote bag Hot girls love Brandísimas">
+          <div class="ph" style="--ar:0.561"><img data-frame="1 0 0" src="assets/img/ig-1.webp" alt="" width="900" height="1125" loading="lazy" decoding="async"></div>
         </a>
-        <a class="ig-tile" href="https://www.instagram.com/brandisimas.cl" target="_blank" rel="noopener" data-ig aria-label="Ver en Instagram: polerón Girly Creative">
-          <div class="ph"><img src="assets/img/ig-2.webp" data-frame="1 0 0" alt="" width="900" height="853" loading="lazy" decoding="async"></div>
+        <a class="fan-card fan-card--2" href="https://www.instagram.com/brandisimas.cl" target="_blank" rel="noopener" data-ig aria-label="Ver en Instagram: polerón Girly Creative">
+          <div class="ph" style="--ar:1.144"><img data-frame="1 0 0" src="assets/img/ig-2.webp" alt="" width="900" height="853" loading="lazy" decoding="async"></div>
         </a>
-        <a class="ig-tile" href="https://www.instagram.com/brandisimas.cl" target="_blank" rel="noopener" data-ig aria-label="Ver en Instagram: mesa de estampados">
-          <div class="ph"><img src="assets/img/ig-3.webp" data-frame="1.1178 -5.89 -16.12" alt="" width="900" height="1349" loading="lazy" decoding="async"></div>
+        <a class="fan-card fan-card--3" href="https://www.instagram.com/brandisimas.cl" target="_blank" rel="noopener" data-ig aria-label="Ver en Instagram: mesa de estampados">
+          <div class="ph" style="--ar:1.144"><img data-frame="1.1178 -5.89 -16.12" src="assets/img/ig-3.webp" alt="" width="900" height="1349" loading="lazy" decoding="async"></div>
         </a>
       </div>
     </div>
@@ -372,33 +371,37 @@
 
 </main>
 
-<!-- 9. Footer -->
+<!-- 6. Footer rosa con onda superior (manual, sistema web) -->
 <footer class="footer">
-  <div class="container footer-inner">
-    <div class="footer-top">
-      <img src="assets/logo.png" alt="Brandísimas — Se ve, se vive, se estampa." class="footer-logo logo-img" loading="lazy">
-      <nav class="footer-links" aria-label="Enlaces del pie">
-        <a href="#inicio">Inicio</a>
-        <a href="#como-funciona">Cómo funciona</a>
-        <a href="#servicios">Servicios</a>
-        <a href="#productos">Productos</a>
-      </nav>
+  <svg class="footer-wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true"><path d="M0 46C120 6 240 6 360 38s240 58 360 30 240-66 360-58 240 50 360 40V90H0Z"/></svg>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="assets/logo-negativo.png" alt="Brandísimas. Se ve, se vive, se estampa." class="footer-logo" width="900" height="245" loading="lazy">
     </div>
-    <div class="footer-bottom">
-      <span>© <span id="year">2026</span> Brandísimas</span>
-      <a href="https://www.instagram.com/brandisimas.cl" target="_blank" rel="noopener" data-ig>Instagram</a>
+    <nav class="footer-links" aria-label="Enlaces del pie">
+      <a href="#nosotros">Nosotros</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#productos">Productos</a>
+      <a href="#cotizar">Cotiza</a>
+    </nav>
+    <div class="footer-contact">
+      <a href="#" data-wa><svg class="f-ico" aria-hidden="true"><use href="#i-wa"/></svg>+56 9 8287 9392</a>
+      <a href="https://www.instagram.com/brandisimas.cl" target="_blank" rel="noopener" data-ig><svg class="f-ico" aria-hidden="true"><use href="#i-ig"/></svg>@brandisimas.cl</a>
     </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="year">2026</span> Brandísimas · brandisimas.cl</span>
+    <span>Se ve, se vive, se estampa.</span>
   </div>
 </footer>
 
-<!-- 10. WhatsApp flotante -->
-<a class="wa-float" href="https://wa.me/56982879392?text=Hola%20Brand%C3%ADsimas!%20Quiero%20cotizar%20el%20patch%20bar%20para%20mi%20evento." target="_blank" rel="noopener" data-wa aria-label="Escríbenos por WhatsApp">
+<!-- 7. WhatsApp flotante -->
+<a class="wa-float" href="https://wa.me/56982879392" target="_blank" rel="noopener" data-wa aria-label="Escríbenos por WhatsApp">
   <span class="wa-ring" aria-hidden="true"></span>
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path fill="currentColor" d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.79-1.47-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.14-.14.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.38-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35M12.04 21.5h-.01a9.45 9.45 0 0 1-4.8-1.32l-.35-.2-3.57.94.95-3.48-.22-.36a9.42 9.42 0 0 1-1.45-5.04c0-5.2 4.25-9.44 9.47-9.44a9.4 9.4 0 0 1 6.69 2.77 9.35 9.35 0 0 1 2.77 6.68c0 5.2-4.25 9.45-9.48 9.45M20.5 3.49A11.8 11.8 0 0 0 12.04 0C5.5 0 .2 5.3.2 11.81c0 2.08.55 4.11 1.58 5.9L.1 24l6.45-1.69a11.9 11.9 0 0 0 5.49 1.39h.01c6.53 0 11.84-5.3 11.84-11.81 0-3.16-1.24-6.13-3.48-8.36"/>
-  </svg>
+  <svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>
 </a>
 
-<script src="js/main.js?v=20260930g"></script>
+<script src="js/main.js?v=20261014d"></script>
 </body>
 </html>
