@@ -24,7 +24,7 @@
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 
 <link rel="preload" as="image" href="assets/img/hero-main.webp">
-<link rel="stylesheet" href="css/style.css?v=20261014b">
+<link rel="stylesheet" href="css/style.css?v=20261014c">
 </head>
 <body>
 <!--
@@ -82,8 +82,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
     <div class="hero-stage">
       <p class="slogan" aria-hidden="true">
-        <span class="slogan-line"><span class="slogan-in"><svg class="slogan-flor"><use href="#flor"/></svg>Se ve,</span></span>
-        <span class="slogan-line"><span class="slogan-in">se vive,</span></span>
+        <span class="slogan-line"><span class="slogan-in">Se ve, se vive,</span></span>
         <span class="slogan-line"><span class="slogan-in">se estampa.</span></span>
       </p>
 
@@ -104,14 +103,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         </div></div></div>
       </div>
 
-      <!-- Sello: el isotipo aparece una sola vez en la página -->
-      <div class="seal" aria-hidden="true">
-        <svg class="seal-ring" viewBox="0 0 200 200">
-          <defs><path id="ring" d="M100 100m-76 0a76 76 0 1 1 152 0a76 76 0 1 1-152 0"/></defs>
-          <text><textPath href="#ring" textLength="470" lengthAdjust="spacing">SE VE • SE VIVE • SE ESTAMPA • </textPath></text>
-        </svg>
-        <img class="seal-iso" src="assets/isotipo-512.png" alt="" width="512" height="497">
-      </div>
     </div>
 
     <div class="hero-copy">
@@ -129,16 +120,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
     </div>
   </section>
 
-  <!-- 3. Marquee: reacciona a la velocidad del scroll -->
-  <div class="ticker" aria-label="Eventos donde estamos">
-    <div class="ticker-track">
-      <ul class="ticker-row">
-        <li>Cumpleaños</li><li>Matrimonios</li><li>Baby shower</li><li>Graduaciones</li><li>Activaciones de marca</li><li>Lanzamientos</li><li>Ferias</li><li>Team building</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- 4. Fichero: cada sección es una carpeta con pestaña -->
+  <!-- 3. Fichero: cada sección es una carpeta con pestaña -->
   <div class="cabinet" id="cabinet">
 
     <!-- Carpeta 1: Nosotros -->
@@ -246,34 +228,33 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
       <a class="folder-tab" href="#productos">Productos</a>
       <div class="folder-sheet">
         <h2 class="h2 h2--center" id="t-prod">¿Qué pueden personalizar?</h2>
-        <div class="rack">
-          <span class="rack-rod" aria-hidden="true"></span>
-          <ul class="tags">
-            <li class="tag" style="--r:-1.5deg"><span class="tag-string" aria-hidden="true"></span>
-              <div class="tag-card"><span class="tag-hole" aria-hidden="true"></span>
-                <img src="assets/img/prod-tote-bag.webp" alt="Tote bag de algodón crudo" width="900" height="1187" loading="lazy" decoding="async" draggable="false">
-                <h3>Tote bags</h3>
-              </div>
+        <div class="carousel">
+          <button class="carousel-btn carousel-prev" id="prodPrev" aria-label="Producto anterior" aria-controls="prodTrack">
+            <svg viewBox="0 0 38.8793 59.0002" aria-hidden="true"><path d="M33.8791 5.00016L7.37909 26.5002L33.8791 54.0002" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg>
+          </button>
+
+          <ul class="carousel-track" id="prodTrack" tabindex="0" aria-label="Productos personalizables">
+            <li class="product">
+              <h3>Tote<br>bags</h3>
+              <img src="assets/img/prod-tote-bag.webp" alt="Tote bag de algodón crudo" width="900" height="1187" loading="lazy" decoding="async">
             </li>
-            <li class="tag" style="--r:1deg"><span class="tag-string" aria-hidden="true"></span>
-              <div class="tag-card"><span class="tag-hole" aria-hidden="true"></span>
-                <img src="assets/img/prod-bucket-hat.webp" alt="Bucket hat color crudo" width="900" height="750" loading="lazy" decoding="async" draggable="false">
-                <h3>Bucket hat</h3>
-              </div>
+            <li class="product">
+              <h3>Bucket hat</h3>
+              <img src="assets/img/prod-bucket-hat.webp" alt="Bucket hat color crudo" width="900" height="750" loading="lazy" decoding="async">
             </li>
-            <li class="tag" style="--r:-1deg"><span class="tag-string" aria-hidden="true"></span>
-              <div class="tag-card"><span class="tag-hole" aria-hidden="true"></span>
-                <img src="assets/img/prod-vasos.webp" alt="Vaso de vidrio con tapa de bambú y bombilla" width="900" height="1187" loading="lazy" decoding="async" draggable="false">
-                <h3>Vasos</h3>
-              </div>
+            <li class="product">
+              <h3>Vasos</h3>
+              <img src="assets/img/prod-vasos.webp" alt="Vaso de vidrio con tapa de bambú y bombilla" width="900" height="1187" loading="lazy" decoding="async">
             </li>
-            <li class="tag" style="--r:1.5deg"><span class="tag-string" aria-hidden="true"></span>
-              <div class="tag-card"><span class="tag-hole" aria-hidden="true"></span>
-                <img src="assets/img/prod-poleras.webp" alt="Polera oversize color crudo" width="900" height="1187" loading="lazy" decoding="async" draggable="false">
-                <h3>Poleras</h3>
-              </div>
+            <li class="product">
+              <h3>Poleras</h3>
+              <img src="assets/img/prod-poleras.webp" alt="Polera oversize color crudo" width="900" height="1187" loading="lazy" decoding="async">
             </li>
           </ul>
+
+          <button class="carousel-btn carousel-next" id="prodNext" aria-label="Producto siguiente" aria-controls="prodTrack">
+            <svg viewBox="0 0 38.8793 59.0002" aria-hidden="true"><path d="M33.8791 5.00016L7.37909 26.5002L33.8791 54.0002" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round"/></svg>
+          </button>
         </div>
       </div>
     </section>
@@ -412,6 +393,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
   <svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>
 </a>
 
-<script src="js/main.js?v=20261014b"></script>
+<script src="js/main.js?v=20261014c"></script>
 </body>
 </html>
