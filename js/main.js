@@ -1,80 +1,54 @@
 /* ============================================================
-   BRANDÍSIMAS — main.js
+   BRANDÍSIMAS · Rediseño 3 · main.js
+   Reglas: todo es visible sin JS. GSAP solo mueve, escala, rota,
+   recorta o filtra; nunca toca opacity.
    ============================================================ */
 (function () {
   'use strict';
 
-  /* ---------- Datos de contacto -------------------------------------- */
-  var WHATSAPP = '56982879392';                       // sin +, sin espacios
-  var WA_TEXT  = 'Hola Brandísimas! Quiero cotizar el patch bar para mi evento.';
+  var root = document.documentElement;
+  root.classList.add('js');
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine    = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var hasGsap = !!(window.gsap && window.ScrollTrigger);
+
+  /* ---------- Contacto ----------------------------------------------- */
+  var WHATSAPP  = '56982879392';
+  var WA_TEXT   = 'Hola Brandísimas! Quiero cotizar el stand de estampado para mi evento.';
   var INSTAGRAM = 'https://www.instagram.com/brandisimas.cl';
 
   function waUrl(text) {
     return 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(text);
   }
-
   document.querySelectorAll('[data-wa]').forEach(function (el) {
     el.href = waUrl(WA_TEXT);
     el.target = '_blank';
     el.rel = 'noopener';
   });
+  document.querySelectorAll('[data-ig]').forEach(function (el) { el.href = INSTAGRAM; });
 
-  document.querySelectorAll('[data-ig]').forEach(function (el) {
-    el.href = INSTAGRAM;
-  });
-
-  /* ---------- Año del footer ---------------------------------------- */
   var year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
 
-  /* ---------- Loader ------------------------------------------------- */
-  var loader = document.getElementById('loader');
-  window.addEventListener('load', function () {
-    if (loader) loader.classList.add('is-done');
-  });
+  if (hasGsap) gsap.registerPlugin(ScrollTrigger);
 
-  /* ---------- Navbar: clase .scrolled a los 50px --------------------- */
-  var nav = document.getElementById('nav');
-  function onScroll() {
-    if (!nav) return;
-    nav.classList.toggle('scrolled', window.scrollY > 50);
-  }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-
-  /* ---------- Menú móvil --------------------------------------------- */
-  var toggle = document.getElementById('navToggle');
-  var links  = document.getElementById('navLinks');
-
-  function closeMenu() {
-    if (!links || !toggle) return;
-    links.classList.remove('open');
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.setAttribute('aria-label', 'Abrir menú');
+  /* ---------- Scroll suave (Lenis) ----------------------------------- */
+  var lenis = null;
+  if (!reduced && window.Lenis && hasGsap) {
+    lenis = new Lenis({ lerp: 0.11, wheelMultiplier: 1, touchMultiplier: 1.4 });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
+    gsap.ticker.lagSmoothing(0);
   }
 
-  if (toggle && links) {
-    toggle.addEventListener('click', function () {
-      var open = links.classList.toggle('open');
-      toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
-    });
-
-    links.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', closeMenu);
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeMenu();
-    });
+  function scrollVelocity() {
+    return lenis ? (lenis.velocity || 0) : 0;
   }
 
-  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* ---------- Encuadre de fotos ---------------------------------------
-     data-frame="escala x y" replica el recorte definido en el diseño:
-     la foto cubre su marco, se amplía por `escala` y su centro se
-     desplaza x/y (en % del marco). Sin JS queda en cover centrado.    */
+  /* ---------- Encuadre de fotos (igual que brandisimas.cl) ----------
+     data-frame="escala x y": la foto cubre su marco, se amplía por
+     `escala` y su centro se desplaza x/y (en % del marco).          */
   var framed = Array.prototype.slice.call(document.querySelectorAll('img[data-frame]'));
 
   function applyFrame(img) {
@@ -82,18 +56,14 @@
     var fw = box.clientWidth, fh = box.clientHeight;
     var iw = img.naturalWidth, ih = img.naturalHeight;
     if (!fw || !fh || !iw || !ih) return;
-
     var v = img.getAttribute('data-frame').split(/\s+/).map(parseFloat);
     var s = v[0] || 1, x = v[1] || 0, y = v[2] || 0;
     var k = Math.max(fw / iw, fh / ih) * s;
     var w = iw * k, h = ih * k;
-
-    // La foto nunca debe dejar un borde del marco al descubierto.
     var mx = Math.max(0, (w / fw - 1) * 50);
     var my = Math.max(0, (h / fh - 1) * 50);
     x = Math.max(-mx, Math.min(mx, x));
     y = Math.max(-my, Math.min(my, y));
-
     img.style.width  = (w / fw * 100) + '%';
     img.style.height = (h / fh * 100) + '%';
     img.style.left   = (50 + x) + '%';
@@ -104,281 +74,185 @@
     if (img.complete && img.naturalWidth) applyFrame(img);
     img.addEventListener('load', function () { applyFrame(img); });
   });
-
-  if (framed.length && 'ResizeObserver' in window) {
-    // El recorte depende de la proporción del marco, que cambia con el ancho.
-    var ro = new ResizeObserver(function (entries) {
-      entries.forEach(function (entry) {
-        var img = entry.target.querySelector('img[data-frame]');
+  if (window.ResizeObserver) {
+    var fro = new ResizeObserver(function (entries) {
+      entries.forEach(function (e) {
+        var img = e.target.querySelector('img[data-frame]');
         if (img) applyFrame(img);
       });
     });
-    framed.forEach(function (img) { ro.observe(img.parentElement); });
-  } else {
-    window.addEventListener('resize', function () { framed.forEach(applyFrame); });
+    framed.forEach(function (img) { fro.observe(img.parentElement); });
   }
 
-  /* ---------- Ajuste a una pantalla -----------------------------------
-     En escritorio cada sección debe caber en la ventana (el imán de
-     scroll la remata ahí). Si el contenido [data-fit] es más alto que el
-     espacio útil, se reduce con zoom; a la vez se le da más ancho, que
-     acorta los textos, así la reducción es la mínima necesaria.
-     Sin JS o en móvil queda el alto natural.                           */
-  var fitMq = window.matchMedia('(min-width: 1024px) and (min-height: 600px)');
-  var fitBoxes = Array.prototype.slice.call(document.querySelectorAll('[data-fit]'));
-  var FIT_MIN = 0.55;      // bajo esto se prefiere dejar la sección más alta
-  var FIT_WIDE = 1440;     // ancho máximo en pantalla cuando hay zoom
+  /* ---------- Onda de marca continua --------------------------------
+     Un solo trazo que recorre el fichero y el cierre de punta a punta
+     (manual: trazo continuo, grosor uniforme, curvas amplias, sale por
+     los bordes). Se genera a la medida, así no hay mosaico ni cortes.
+     Es una curva tipo trocoide: avanza hacia abajo y hace bucles.   */
+  var mainEl = document.querySelector('main');
+  var outroEl = document.querySelector('.outro');
+  var ondas = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  ondas.setAttribute('class', 'ondas-fondo');
+  ondas.setAttribute('aria-hidden', 'true');
+  mainEl.insertBefore(ondas, mainEl.firstChild);
 
-  function fitBox(box) {
-    box.style.zoom = '';
-    box.style.maxWidth = '';
-    if (!fitMq.matches) return;
+  function trazo(W, H, o) {
+    var d = '', t0 = -2, t1 = H / o.S + 2;
+    for (var t = t0; t <= t1; t += 0.035) {
+      var x = W / 2 + o.A * Math.sin(o.a * t + o.p) + o.R * Math.sin(t + o.q);
+      var y = o.S * t + o.R * 0.92 * Math.cos(t + o.q);
+      d += (d ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }
+    return d;
+  }
 
-    var sec = box.closest('section');
-    var cs = getComputedStyle(sec);
-    var avail = window.innerHeight - (nav ? nav.offsetHeight : 0) -
-                parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-    var r = box.getBoundingClientRect();
-    var minZ = parseFloat(box.getAttribute('data-fit-min')) || FIT_MIN;
+  function drawOndas() {
+    var top = cabinet.offsetTop;
+    var H = outroEl.offsetTop + outroEl.offsetHeight - top;
+    var W = mainEl.clientWidth;
+    var m = W < 768;
+    ondas.style.top = top + 'px';
+    ondas.style.height = H + 'px';
+    ondas.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    var sw = m ? 34 : Math.min(84, W * 0.055);
+    var R = m ? W * 0.24 : Math.min(300, W * 0.2);
+    var paths = [
+      { A: W * 0.42, a: 0.31, p: 0.4, R: R, q: 0, S: m ? 70 : 130, op: 0.1 },
+      { A: W * 0.38, a: 0.23, p: 3.4, R: R * 0.82, q: 2.1, S: m ? 95 : 170, op: 0.07 }
+    ];
+    ondas.innerHTML = paths.map(function (o) {
+      return '<path d="' + trazo(W, H, o) + '" stroke-width="' + sw + '" stroke-opacity="' + o.op + '"/>';
+    }).join('');
+  }
 
-    /* data-fit-keep-width: escala pura, la sección se ve igual que a
-       tamaño completo, solo más chica (Servicios, a pedido del cliente).
-       Su ancho lo fija el CSS, así que también debe caber a lo ancho. */
-    if (box.hasAttribute('data-fit-keep-width')) {
-      // Elementos fuera del flujo (p. ej. "Siempre incluye" al margen)
-      // también deben quedar dentro de la pantalla.
-      var side = box.querySelector('[data-fit-side]');
-      var secLeft = sec.getBoundingClientRect().left;
-      function sideOut() {
-        return side && getComputedStyle(side).position === 'absolute' &&
-               side.getBoundingClientRect().left < secLeft + 8;
-      }
-      if (r.height <= avail && !sideOut()) return;
+  /* ---------- Fichero: carpetas que se apilan ------------------------
+     Cada carpeta se pega en --T (bajo la navbar + fila de pestañas).
+     Si es más alta que la pantalla, se pega recién cuando su borde
+     inferior llega al fondo, así nunca se esconde contenido.        */
+  var nav     = document.getElementById('nav');
+  var cabinet = document.getElementById('cabinet');
+  var folders = Array.prototype.slice.call(document.querySelectorAll('.folder'));
+  var anchors = folders.map(function (f) { return f.previousElementSibling; });
+  var T = 0, gapTop = 0;
 
-      box.style.maxWidth = r.width + 'px';
-      var kz = Math.max(minZ, Math.min(1, avail / r.height));
-      box.style.zoom = kz;
-      // el redondeo del zoom puede dejarla unos px más alta que la pantalla
-      while (kz > minZ && (box.getBoundingClientRect().height > avail || sideOut())) {
-        kz -= 0.002;
-        box.style.zoom = kz;
-      }
+  /* En escritorio, una carpeta más alta que la pantalla se escala (zoom)
+     hasta caber, así nunca se pega por arriba y las pestañas de las
+     carpetas anteriores siguen a la vista.                          */
+  var canZoom = window.CSS && CSS.supports && CSS.supports('zoom', '1');
+  function fitFolder(f, avail) {
+    var sheet = f.querySelector('.folder-sheet');
+    var kids = Array.prototype.slice.call(sheet.children);
+    var z = parseFloat(sheet.getAttribute('data-z')) || 1;
+    if (!canZoom || window.innerWidth < 1024) {
+      if (z !== 1) { kids.forEach(function (k) { k.style.zoom = ''; }); sheet.removeAttribute('data-z'); }
       return;
     }
-
-    if (r.height <= avail) return;
-    var base = r.width;
-
-    var wideMax = Math.max(base, Math.min(sec.clientWidth, FIT_WIDE));
-
-    /* Dos estrategias y gana la que deja el zoom más alto: ensanchar
-       ayuda donde manda el texto (Servicios) y perjudica donde mandan
-       fotos con proporción fija (Cómo funciona), que crecen en alto. */
-    function solve(wide) {
-      var z = 1, h = r.height;
-
-      function apply(v) {
-        z = Math.max(minZ, Math.min(1, v));
-        box.style.zoom = z;
-        // max-width va en px del elemento: el ancho en pantalla es max-width × zoom
-        box.style.maxWidth = (Math.min(wide, base / z) / z) + 'px';
-        h = box.getBoundingClientRect().height;
-      }
-
-      for (var i = 0; i < 10; i++) {
-        apply(z * avail / h);
-        if (h <= avail && h > avail - 6) break;
-      }
-      while (h > avail && z > minZ) apply(z - 0.01);
-      // Y lo más grande posible: subir de a poco mientras siga cabiendo.
-      while (z < 1) {
-        var fits = z;
-        apply(z + 0.01);
-        if (h > avail) { apply(fits); break; }
-      }
-      return z;
+    var cs = getComputedStyle(sheet);
+    var pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    for (var pass = 0; pass < 3; pass++) {
+      var content = kids[kids.length - 1].getBoundingClientRect().bottom - kids[0].getBoundingClientRect().top;
+      var room = avail - pad - 8;
+      var nz = Math.max(window.innerHeight < 700 ? 0.58 : 0.62, Math.min(1, z * room / content));
+      if (Math.abs(nz - z) < 0.01) break;
+      z = nz;
+      kids.forEach(function (k) { k.style.zoom = z === 1 ? '' : z; });
     }
-
-    var zNarrow = solve(base);
-    if (wideMax > base && solve(wideMax) < zNarrow) solve(base);
+    sheet.setAttribute('data-z', z);
   }
 
-  function fitAll() { fitBoxes.forEach(fitBox); }
-
-  var fitTimer;
-  function fitLater() { clearTimeout(fitTimer); fitTimer = setTimeout(fitAll, 120); }
-
-  if (fitBoxes.length) {
-    fitAll();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
-    window.addEventListener('load', fitAll);
-    window.addEventListener('resize', fitLater);
-  }
-
-  /* ---------- Rueda del mouse: un gesto = una sección -----------------
-     Con solo el snap de CSS, Chrome decide el destino según distancia e
-     inercia: un giro corto de rueda o un gesto suave de trackpad vuelve
-     a la sección actual y parece que el scroll no funciona. Aquí cada
-     gesto va a la sección siguiente o anterior, y la inercia del
-     trackpad se descarta hasta que el gesto termina. Teclado y barra de
-     scroll siguen con el snap de CSS.                                  */
-  var WHEEL_QUIET = 220;   // ms sin eventos de rueda = gesto terminado
-  var WHEEL_MIN = 24;      // delta acumulado mínimo para cambiar de sección
-  var paging = false, lastWheel = 0, wheelAcc = 0;
-
-  function snapTops() {
-    var nh = nav ? nav.offsetHeight : 0;
-    var tops = Array.prototype.map.call(document.querySelectorAll('main > section'), function (s) {
-      return Math.round(s.getBoundingClientRect().top + window.scrollY - nh);
+  function layoutStack() {
+    var tab = folders[0].querySelector('.folder-tab');
+    var tabH = tab.offsetHeight;
+    var cs = getComputedStyle(folders[1] || folders[0]);
+    gapTop = parseFloat(cs.marginTop) || 0;               // tab-h + tab-gap
+    T = Math.round(nav.getBoundingClientRect().bottom + 12 + tabH);
+    root.style.setProperty('--T', T + 'px');
+    var vh = window.innerHeight;
+    var tallBefore = false;
+    folders.forEach(function (f) { fitFolder(f, vh - T); });
+    folders.forEach(function (f) {
+      var top = Math.min(T, vh - f.offsetHeight);
+      f.style.setProperty('--top', top + 'px');
+      // Tras una carpeta más alta que la pantalla, la franja sobre la
+      // pestaña mostraría su contenido: se tapa con el color de la mesa.
+      f.classList.toggle('has-collar', tallBefore);
+      if (top < T) tallBefore = true;
     });
-    tops.push(document.documentElement.scrollHeight - window.innerHeight);   // footer
-    return tops;
   }
 
-  // ¿El cursor está sobre algo que debe hacer su propio scroll? (textarea, etc.)
-  function scrollsInside(el, dy) {
-    for (; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
-      if (el.scrollHeight <= el.clientHeight + 1) continue;
-      var oy = getComputedStyle(el).overflowY;
-      if (oy !== 'auto' && oy !== 'scroll') continue;
-      if (dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : el.scrollTop > 0) return true;
-    }
-    return false;
+  cabinet.classList.add('js-stack');
+  layoutStack();
+  drawOndas();
+
+  /* Posición natural (sin sticky) de la hoja de una carpeta */
+  function folderY(i) {
+    return anchors[i].getBoundingClientRect().top + window.scrollY + gapTop - T;
   }
 
-  function pageTo(target) {
-    paging = true;
-    wheelAcc = 0;
-    window.scrollTo({ top: target, behavior: reduced ? 'auto' : 'smooth' });
-    var started = Date.now();
-    (function wait() {
-      var arrived = Math.abs(window.scrollY - target) < 2 || Date.now() - started > 1600;
-      if (arrived && Date.now() - lastWheel > WHEEL_QUIET) { paging = false; return; }
-      setTimeout(wait, 50);
-    })();
+  /* ---------- Navegación con anclas ---------------------------------- */
+  function goTo(hash) {
+    var el = document.querySelector(hash);
+    if (!el) return;
+    var i = anchors.indexOf(el);
+    var y = i > -1 ? folderY(i) : el.getBoundingClientRect().top + window.scrollY;
+    if (lenis) lenis.scrollTo(y, { duration: 1.4 });
+    else window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
   }
 
-  window.addEventListener('wheel', function (e) {
-    if (!fitMq.matches || e.ctrlKey) return;                       // ctrl+rueda = zoom
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;           // gesto horizontal (carrusel)
-    if (scrollsInside(e.target, e.deltaY)) return;
-
-    var now = Date.now();
-    if (now - lastWheel > WHEEL_QUIET) wheelAcc = 0;
-    lastWheel = now;
-
-    if (paging) { e.preventDefault(); return; }
-
-    var tops = snapTops();
-    var y = window.scrollY;
-    var useful = window.innerHeight - (nav ? nav.offsetHeight : 0);
-    var i = 0;
-    while (i + 1 < tops.length && tops[i + 1] <= y + 2) i++;
-
-    var dir = e.deltaY > 0 ? 1 : -1;
-    // Sección más alta que la pantalla: se recorre libre hasta su borde.
-    if (dir > 0 && i + 1 < tops.length && y + useful < tops[i + 1] - 2) return;
-
-    e.preventDefault();
-    wheelAcc += e.deltaY;
-    if (Math.abs(wheelAcc) < WHEEL_MIN) return;
-
-    var target = dir > 0
-      ? tops[Math.min(i + 1, tops.length - 1)]
-      : (y > tops[i] + 2 ? tops[i] : tops[Math.max(i - 1, 0)]);
-    if (Math.abs(target - y) < 2) { wheelAcc = 0; return; }
-    pageTo(target);
-  }, { passive: false });
-
-  /* ---------- Carrusel infinito de productos --------------------------
-     Se clona el set completo a cada lado y se salta el scroll un set
-     entero al llegar a un borde. El salto es instantáneo, así que la
-     costura no se ve y las flechas nunca se topan con un extremo.     */
-  var track = document.getElementById('prodTrack');
-  var prev  = document.getElementById('prodPrev');
-  var next  = document.getElementById('prodNext');
-
-  if (track && prev && next) {
-    var originals = Array.prototype.slice.call(track.children);
-    var setLen = originals.length;
-
-    // Un set antes y otro después de los originales.
-    var before = document.createDocumentFragment();
-    var after  = document.createDocumentFragment();
-    originals.forEach(function (li) {
-      var a = li.cloneNode(true);
-      var b = li.cloneNode(true);
-      [a, b].forEach(function (c) {
-        c.setAttribute('data-clone', '');
-        c.setAttribute('aria-hidden', 'true');
-        c.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
-      });
-      before.appendChild(a);
-      after.appendChild(b);
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var hash = a.getAttribute('href');
+      if (hash.length < 2) return;
+      e.preventDefault();
+      closeMenu();
+      goTo(hash);
+      history.replaceState(null, '', hash);
     });
-    track.insertBefore(before, track.firstChild);
-    track.appendChild(after);
+  });
 
-    var setWidth = 0;
+  /* ---------- Menú móvil --------------------------------------------- */
+  var toggle = document.getElementById('navToggle');
+  var links  = document.getElementById('navLinks');
 
-    function measure() {
-      var items = track.children;
-      if (!items.length) return 0;
-      var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-      var w = items[0].getBoundingClientRect().width + gap;
-      setWidth = w * setLen;
-      return w;
+  function closeMenu() {
+    links.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Abrir menú');
+  }
+  toggle.addEventListener('click', function () {
+    var open = !links.classList.contains('open');
+    links.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(); });
+  document.addEventListener('click', function (e) {
+    if (links.classList.contains('open') && !nav.contains(e.target)) closeMenu();
+  });
+
+  /* ---------- Indicador de sección activa en la navbar --------------- */
+  var navInk = document.querySelector('.nav-ink');
+  var navA = Array.prototype.slice.call(links.querySelectorAll('[data-nav]'));
+
+  function setActive(id) {
+    var hit = null;
+    navA.forEach(function (a) {
+      var on = a.getAttribute('data-nav') === id;
+      a.classList.toggle('is-active', on);
+      if (on) hit = a;
+    });
+    if (hit) {
+      navInk.style.setProperty('--x', (hit.offsetLeft + 14) + 'px');
+      navInk.style.setProperty('--w', (hit.offsetWidth - 28) + 'px');
+    } else {
+      navInk.style.setProperty('--w', '0px');
     }
-
-    function jump(delta) {
-      var prevBehavior = track.style.scrollBehavior;
-      track.style.scrollBehavior = 'auto';
-      track.scrollLeft += delta;
-      // forzar reflow para que el navegador aplique el salto sin animar
-      void track.offsetWidth;
-      track.style.scrollBehavior = prevBehavior;
-    }
-
-    function recenter() {
-      if (!setWidth) return;
-      if (track.scrollLeft < setWidth * 0.5) jump(setWidth);
-      else if (track.scrollLeft > setWidth * 1.5) jump(-setWidth);
-    }
-
-    function reset() {
-      measure();
-      jump(setWidth - track.scrollLeft);
-    }
-
-    /* El recentrado nunca interrumpe una animación en curso:
-       con arrastre manual se hace al quedar quieto, y con las flechas
-       justo ANTES de animar. Si se hiciera durante el scroll suave, el
-       salto se come el avance del click en la costura. */
-    var idle;
-    track.addEventListener('scroll', function () {
-      clearTimeout(idle);
-      idle = setTimeout(recenter, 140);
-    }, { passive: true });
-
-    function move(dir) {
-      var itemWidth = measure();
-      recenter();
-      track.scrollBy({ left: dir * itemWidth, behavior: reduced ? 'auto' : 'smooth' });
-    }
-
-    prev.addEventListener('click', function () { move(-1); });
-    next.addEventListener('click', function () { move(1); });
-
-    window.addEventListener('resize', reset);
-    reset();
-    // Las imágenes cambian el layout al cargar; recentrar cuando terminen.
-    window.addEventListener('load', reset);
   }
 
-  /* ---------- Formulario de cotización --------------------------------
-     No hay backend: al enviar se arma el mensaje con los datos y se
-     abre el chat de WhatsApp de Brandísimas.                          */
+  /* ---------- Formulario de cotización -------------------------------
+     Sin backend: arma el mensaje y abre WhatsApp.                    */
   var form = document.getElementById('quoteForm');
+  var setTipo = function () {};
 
   if (form) {
     var done        = document.getElementById('quoteDone');
@@ -391,39 +265,35 @@
     var orgInput    = document.getElementById('orgInput');
     var tipoBtns    = Array.prototype.slice.call(form.querySelectorAll('[data-tipo]'));
     var prodBtns    = Array.prototype.slice.call(form.querySelectorAll('[data-prod]'));
-
     var tipo = 'Celebración';
 
-    function setOn(btn, on) {
+    var setOn = function (btn, on) {
       btn.classList.toggle('is-on', on);
       btn.setAttribute('aria-pressed', String(on));
-    }
+    };
 
-    function setTipo(t) {
+    setTipo = function (t) {
       tipo = t;
       tipoBtns.forEach(function (b) { setOn(b, b.getAttribute('data-tipo') === t); });
       var emp = t === 'Empresa';
       orgLabel.textContent = emp ? 'Empresa' : 'Tipo de celebración';
       orgInput.placeholder = emp ? 'Nombre de la empresa' : 'Cumpleaños, matrimonio…';
-    }
+    };
 
     tipoBtns.forEach(function (b) {
       b.addEventListener('click', function () { setTipo(b.getAttribute('data-tipo')); });
     });
-
     prodBtns.forEach(function (b) {
       b.addEventListener('click', function () { setOn(b, !b.classList.contains('is-on')); });
     });
-
-    // Los botones de Servicios dejan el tipo de evento ya elegido.
     document.querySelectorAll('[data-pick]').forEach(function (a) {
       a.addEventListener('click', function () { setTipo(a.getAttribute('data-pick')); });
     });
 
-    function clearErrors() {
+    var clearErrors = function () {
       errorBox.hidden = true;
       form.querySelectorAll('.is-invalid').forEach(function (el) { el.classList.remove('is-invalid'); });
-    }
+    };
 
     form.addEventListener('input', function (e) {
       if (e.target.classList) e.target.classList.remove('is-invalid');
@@ -452,7 +322,7 @@
         .map(function (b) { return b.getAttribute('data-prod'); });
 
       var fecha = val('fecha');
-      if (fecha) fecha = fecha.split('-').reverse().join('-');   // aaaa-mm-dd → dd-mm-aaaa
+      if (fecha) fecha = fecha.split('-').reverse().join('-');
 
       var lines = [
         'Hola Brandísimas! Quiero cotizar el stand para mi evento.',
@@ -479,8 +349,6 @@
 
       form.hidden = true;
       done.hidden = false;
-
-      // Si el navegador bloquea la ventana nueva, queda el botón de respaldo.
       window.open(url, '_blank', 'noopener');
     });
 
@@ -494,50 +362,240 @@
     });
   }
 
-  /* ---------- GSAP ----------------------------------------------------
-     Solo posición, escala y rotación. Nunca opacity: si GSAP no carga,
-     todo el contenido ya es visible por CSS.                           */
-  if (window.gsap && !reduced) {
-    if (window.ScrollTrigger) {
-      gsap.registerPlugin(ScrollTrigger);
+  if (!hasGsap) {
+    setActive(null);
+    return;
+  }
 
-      // Solo los originales: los clones del carrusel ya entran colocados.
-      gsap.from('.product:not([data-clone])', {
-        y: 40, duration: 0.7, ease: 'power3.out', stagger: 0.09,
-        scrollTrigger: { trigger: '.carousel', start: 'top 85%' }
+  /* ---------- Navbar: estado con scroll ------------------------------ */
+  ScrollTrigger.create({
+    start: 50, end: 'max',
+    onToggle: function (self) { nav.classList.toggle('scrolled', self.isActive); }
+  });
+
+  anchors.forEach(function (a, i) {
+    var id = a.id;
+    var navId = navA.some(function (n) { return n.getAttribute('data-nav') === id; }) ? id : null;
+    ScrollTrigger.create({
+      trigger: a,
+      start: 'top 55%',
+      endTrigger: anchors[i + 1] || cabinet,
+      end: anchors[i + 1] ? 'top 55%' : 'bottom 55%',
+      onToggle: function (self) { if (self.isActive) setActive(navId); },
+      onLeave: function () { if (!anchors[i + 1]) setActive(null); },
+      onLeaveBack: function () { if (i === 0) setActive(null); }
+    });
+  });
+
+  /* ---------- Atenuar la carpeta que queda debajo -------------------- */
+  folders.forEach(function (f, i) {
+    if (i === folders.length - 1) return;
+    gsap.fromTo(f.querySelector('.folder-sheet'), { filter: 'brightness(1)' }, {
+      filter: 'brightness(0.62)',
+      ease: 'none',
+      scrollTrigger: {
+        trigger: anchors[i + 1],
+        start: 'top bottom',
+        end: function () { return 'top ' + (T - gapTop) + 'px'; },
+        scrub: true
+      }
+    });
+  });
+
+  /* ---------- Documentos que salen de la carpeta --------------------- */
+  if (!reduced) {
+    folders.forEach(function (f, i) {
+      var docs = f.querySelectorAll('[data-pull]');
+      docs.forEach(function (d, k) {
+        gsap.fromTo(d, { yPercent: d.classList.contains('doc--step') ? 46 : 34 }, {
+          yPercent: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: anchors[i],
+            start: function () { return 'top ' + (window.innerHeight * (0.92 - k * 0.06)) + 'px'; },
+            end: function () { return 'top ' + (T - gapTop - k * 40) + 'px'; },
+            scrub: 0.8
+          }
+        });
+      });
+    });
+  }
+
+  /* ---------- Hero ---------------------------------------------------- */
+  var slogan = document.querySelector('.slogan');
+  var floats = Array.prototype.slice.call(document.querySelectorAll('.float'));
+
+  if (!reduced) {
+    // Entrada (el loader se va a los ~1s)
+    var intro = gsap.timeline({ delay: 1.0 });
+    intro
+      .from('.slogan-in', { yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09 }, 0)
+      .fromTo('.slogan-in', { letterSpacing: '0.06em' }, { letterSpacing: '0em', duration: 1.5, ease: 'expo.out', stagger: 0.09 }, 0.05)
+      .from('.frame', {
+        y: 150, scale: 0.85,
+        rotation: function (i) { return [-6, 5, -4][i]; },
+        duration: 1.35, ease: 'expo.out', stagger: 0.09
+      }, 0.3)
+      .from('.hero-copy > *', { y: 34, duration: 1, ease: 'expo.out', stagger: 0.08 }, 0.5);
+
+    // Flote continuo, cada foto a su ritmo
+    document.querySelectorAll('.f-bob').forEach(function (b, i) {
+      gsap.to(b, {
+        y: [12, -14, 10][i], rotation: [1.6, -1.4, 1.2][i],
+        duration: [3.4, 4.1, 3.8][i], ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.4
+      });
+    });
+
+    // Scroll: las fotos se van a distinta velocidad y la consigna se comprime
+    var heroScroll = gsap.timeline({
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.6 }
+    });
+    heroScroll
+      .to(slogan, { yPercent: 22, scale: 0.92, ease: 'none' }, 0)
+      .to(floats[0], { y: -240, rotation: -5, ease: 'none' }, 0)
+      .to(floats[1], { y: -150, rotation: 6, ease: 'none' }, 0)
+      .to(floats[2], { y: -320, rotation: -6, ease: 'none' }, 0)
+      .to('.hero-waves', { yPercent: 8, ease: 'none' }, 0)
+      .to('.hero-copy', { y: 70, ease: 'none' }, 0);
+
+    // Tilt al pasar el mouse por encima de cada foto (sin parallax)
+    if (fine) {
+      floats.forEach(function (f) {
+        var el = f.querySelector('.f-par');
+        gsap.set(el, { transformPerspective: 800 });
+        var rx = gsap.quickTo(el, 'rotationX', { duration: 0.5, ease: 'power3.out' });
+        var ry = gsap.quickTo(el, 'rotationY', { duration: 0.5, ease: 'power3.out' });
+        f.addEventListener('pointermove', function (e) {
+          var r = f.getBoundingClientRect();
+          var nx = (e.clientX - r.left) / r.width - 0.5;
+          var ny = (e.clientY - r.top) / r.height - 0.5;
+          rx(ny * -16);
+          ry(nx * 18);
+        });
+        f.addEventListener('pointerleave', function () {
+          gsap.to(el, { rotationX: 0, rotationY: 0, duration: 1, ease: 'elastic.out(1, 0.5)', overwrite: 'auto' });
+        });
       });
     }
+  }
 
-    /* --- Tilt con parallax de mouse en las imágenes ------------------
-       Excluye el carrusel a propósito: ahí el movimiento compite con
-       el scroll horizontal.                                          */
-    var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-    if (finePointer) {
-      document.querySelectorAll('[data-tilt]').forEach(function (img) {
-        var zone = img.parentElement;
-        var MAX = 9;      // grados
-        var LIFT = 10;    // px que "flota"
-
-        var rx = gsap.quickTo(img, 'rotationX', { duration: 0.5, ease: 'power2.out' });
-        var ry = gsap.quickTo(img, 'rotationY', { duration: 0.5, ease: 'power2.out' });
-        var ty = gsap.quickTo(img, 'y',         { duration: 0.5, ease: 'power2.out' });
-        var sc = gsap.quickTo(img, 'scale',     { duration: 0.5, ease: 'power2.out' });
-
-        zone.addEventListener('mousemove', function (e) {
-          var b = zone.getBoundingClientRect();
-          var px = (e.clientX - b.left) / b.width  - 0.5;   // -0.5 .. 0.5
-          var py = (e.clientY - b.top)  / b.height - 0.5;
-          rx(-py * MAX * 2);
-          ry(px * MAX * 2);
-          ty(-LIFT);
-          sc(1.03);
-        });
-
-        zone.addEventListener('mouseleave', function () {
-          rx(0); ry(0); ty(0); sc(1);
-        });
+  /* ---------- Imán en botones --------------------------------------- */
+  if (fine && !reduced) {
+    document.querySelectorAll('[data-magnet]').forEach(function (el) {
+      var mx = gsap.quickTo(el, 'x', { duration: 0.5, ease: 'power3.out' });
+      var my = gsap.quickTo(el, 'y', { duration: 0.5, ease: 'power3.out' });
+      var strength = 0.22;
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        mx((e.clientX - (r.left + r.width / 2)) * strength);
+        my((e.clientY - (r.top + r.height / 2)) * strength * 1.3);
       });
-    }
+      el.addEventListener('pointerleave', function () {
+        gsap.to(el, { x: 0, y: 0, duration: 0.9, ease: 'elastic.out(1, 0.45)', overwrite: 'auto' });
+      });
+    });
+  }
+
+  /* ---------- Carrusel infinito de productos --------------------------
+     El mismo del sitio en producción: se clona el set completo a cada
+     lado y se salta el scroll un set entero al llegar a un borde.     */
+  var track = document.getElementById('prodTrack');
+  var prev  = document.getElementById('prodPrev');
+  var next  = document.getElementById('prodNext');
+
+  if (track && prev && next) {
+    var originals = Array.prototype.slice.call(track.children);
+    var setLen = originals.length;
+
+    var before = document.createDocumentFragment();
+    var after  = document.createDocumentFragment();
+    originals.forEach(function (li) {
+      var a = li.cloneNode(true);
+      var b = li.cloneNode(true);
+      [a, b].forEach(function (c) {
+        c.setAttribute('data-clone', '');
+        c.setAttribute('aria-hidden', 'true');
+        c.querySelectorAll('[id]').forEach(function (n) { n.removeAttribute('id'); });
+      });
+      before.appendChild(a);
+      after.appendChild(b);
+    });
+    track.insertBefore(before, track.firstChild);
+    track.appendChild(after);
+
+    var setWidth = 0;
+
+    var measure = function () {
+      var items = track.children;
+      if (!items.length) return 0;
+      var gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      var w = items[0].getBoundingClientRect().width + gap;
+      setWidth = w * setLen;
+      return w;
+    };
+
+    var jump = function (delta) {
+      var prevBehavior = track.style.scrollBehavior;
+      track.style.scrollBehavior = 'auto';
+      track.scrollLeft += delta;
+      void track.offsetWidth;
+      track.style.scrollBehavior = prevBehavior;
+    };
+
+    var recenter = function () {
+      if (!setWidth) return;
+      if (track.scrollLeft < setWidth * 0.5) jump(setWidth);
+      else if (track.scrollLeft > setWidth * 1.5) jump(-setWidth);
+    };
+
+    var resetCarousel = function () {
+      measure();
+      jump(setWidth - track.scrollLeft);
+    };
+
+    var idle;
+    track.addEventListener('scroll', function () {
+      clearTimeout(idle);
+      idle = setTimeout(recenter, 140);
+    }, { passive: true });
+
+    var move = function (dir) {
+      var itemWidth = measure();
+      recenter();
+      track.scrollBy({ left: dir * itemWidth, behavior: reduced ? 'auto' : 'smooth' });
+    };
+
+    prev.addEventListener('click', function () { move(-1); });
+    next.addEventListener('click', function () { move(1); });
+
+    window.addEventListener('resize', resetCarousel);
+    resetCarousel();
+    window.addEventListener('load', resetCarousel);
+  }
+
+  /* ---------- Cierre: las fotos de Instagram se abren en abanico ----- */
+  if (!reduced) {
+    gsap.from('.fan-card', {
+      x: function (i) { return [140, 0, -140][i]; },
+      y: 60,
+      rotation: function (i) { return [7, -2, -8][i]; },
+      ease: 'none',
+      scrollTrigger: { trigger: '.fan', start: 'top 92%', end: 'center 55%', scrub: 0.8 }
+    });
+    gsap.from('.outro-copy > *', {
+      y: 40, duration: 1, ease: 'expo.out', stagger: 0.08,
+      scrollTrigger: { trigger: '.outro', start: 'top 70%' }
+    });
+  }
+
+  /* ---------- Recalcular al cambiar tamaños -------------------------- */
+  var relayout = function () { layoutStack(); drawOndas(); ScrollTrigger.refresh(); };
+  var rt;
+  window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(relayout, 150); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
+  window.addEventListener('load', relayout);
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(function () { clearTimeout(rt); rt = setTimeout(relayout, 150); });
+    folders.forEach(function (f) { ro.observe(f); });
   }
 })();
