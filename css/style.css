@@ -68,7 +68,6 @@ legend { padding: 0; }
 main { overflow-x: clip; }
 
 :focus-visible { outline: 3px solid var(--negro); outline-offset: 3px; border-radius: 8px; }
-.folder--negro :focus-visible { outline-color: var(--amarillo); }
 
 .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
@@ -160,7 +159,7 @@ html.lenis, html.lenis body { height: auto; }
 }
 .nav.scrolled .nav-bar { box-shadow: 0 18px 40px -18px rgba(80, 20, 50, 0.5); }
 .nav-logo { flex: none; display: block; }
-.logo-img { height: 36px; width: auto; }
+.logo-img { height: 44px; width: auto; }
 
 .nav-links { position: relative; margin-left: auto; display: flex; gap: 2px; }
 .nav-links a {
@@ -215,7 +214,7 @@ html.lenis, html.lenis body { height: auto; }
   background: var(--blanco);
   -webkit-mask: var(--ondas) center / cover no-repeat;
   mask: var(--ondas) center / cover no-repeat;
-  opacity: 0.16;
+  opacity: 0.12;
 }
 /* Curvas de recorte */
 .cut { position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; }
@@ -384,7 +383,7 @@ html.lenis, html.lenis body { height: auto; }
 
 .folder--blanco     { --c: var(--blanco); }
 .folder--rosa       { --c: var(--rosa); --lead: var(--negro); --dot: var(--blanco); }
-.folder--negro      { --c: var(--negro); --on: var(--blanco); --lead: rgba(255, 255, 255, 0.74); --dot: var(--amarillo); }
+.folder--marfil     { --c: var(--marfil); }
 .folder--rosa-suave { --c: var(--rosa-20); }
 .folder--amarillo   { --c: var(--amarillo); --lead: rgba(21, 21, 21, 0.82); --dot: var(--negro); }
 
@@ -498,7 +497,7 @@ html.lenis, html.lenis body { height: auto; }
   background: var(--rosa);
   -webkit-mask: var(--ondas) center / cover no-repeat;
   mask: var(--ondas) center / cover no-repeat;
-  opacity: 0.22;
+  opacity: 0.12;
 }
 
 /* Carpeta 2: Cómo funciona */
@@ -510,7 +509,7 @@ html.lenis, html.lenis body { height: auto; }
   gap: clamp(14px, 2vw, 28px);
   margin: clamp(22px, 3vw, 36px) 4% -54px;
 }
-.doc--step img { aspect-ratio: 16 / 9; object-fit: cover; }
+.doc--step img { aspect-ratio: 3 / 2; object-fit: cover; }
 .steps {
   position: relative; z-index: 1;
   display: grid; grid-template-columns: repeat(5, 1fr);
@@ -540,12 +539,13 @@ html.lenis, html.lenis body { height: auto; }
   display: flex; flex-direction: column;
   padding: 10px 10px 24px;
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--blanco);
+  box-shadow: 0 24px 44px -32px rgba(90, 60, 30, 0.55);
 }
 .serv-photo { aspect-ratio: 2 / 1; border-radius: 16px; overflow: hidden; }
 .serv-photo img { width: 100%; height: 100%; object-fit: cover; }
 .serv:first-child .serv-photo img { object-position: 50% 32%; }
+.serv:last-child .serv-photo img { object-position: 50% 62%; }
 .serv-body { display: flex; flex-direction: column; flex: 1; padding: 20px 14px 0; }
 .serv-body h3 {
   display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
@@ -568,9 +568,9 @@ html.lenis, html.lenis body { height: auto; }
 .chips li {
   padding: 5px 13px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid var(--linea);
   font-size: 13.5px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--texto);
 }
 .serv-lead {
   margin-top: 16px;
@@ -578,10 +578,10 @@ html.lenis, html.lenis body { height: auto; }
   font-weight: 600;
   font-size: clamp(17px, 1.4vw, 20px);
   line-height: 1.25;
-  color: var(--rosa);
+  color: var(--negro);
   text-wrap: balance;
 }
-.serv-body p:not(.serv-lead) { margin-top: 8px; font-size: 15px; line-height: 1.55; color: rgba(255, 255, 255, 0.74); text-wrap: pretty; }
+.serv-body p:not(.serv-lead) { margin-top: 8px; font-size: 15px; line-height: 1.55; color: var(--texto); text-wrap: pretty; }
 .serv-body .btn { align-self: flex-start; margin-top: auto; }
 .serv-body p + .btn { margin-top: 20px; }
 
@@ -589,9 +589,9 @@ html.lenis, html.lenis body { height: auto; }
   display: flex; flex-wrap: wrap; align-items: center; gap: 10px 26px;
   margin-top: clamp(20px, 2.6vw, 32px);
 }
-.includes-title { font-family: var(--display); font-weight: 600; font-size: 15px; color: var(--amarillo); }
+.includes-title { font-family: var(--display); font-weight: 600; font-size: 15px; color: var(--negro); }
 .includes ul { display: flex; flex-wrap: wrap; gap: 10px 22px; }
-.includes li { display: inline-flex; align-items: center; gap: 9px; font-size: 14.5px; color: rgba(255, 255, 255, 0.86); }
+.includes li { display: inline-flex; align-items: center; gap: 9px; font-size: 14.5px; color: var(--texto); }
 .includes .dot { width: 7px; height: 7px; }
 
 /* Carpeta 4: Productos */
@@ -824,7 +824,7 @@ html.lenis, html.lenis body { height: auto; }
 
 @media (max-width: 767px) {
   :root { --nav-h: 58px; --nav-top: 10px; --tab-h: 42px; --tab-gap: 10px; }
-  .logo-img { height: 29px; }
+  .logo-img { height: 47px; }
   .nav-bar { padding: 0 7px 0 16px; gap: 6px; }
   .nav-cta { --h: 40px; padding: 0 14px; font-size: 13px; }
   .nav-toggle { width: 40px; height: 40px; }
@@ -839,7 +839,7 @@ html.lenis, html.lenis body { height: auto; }
   .cut--a { width: 60vw; left: -26vw; bottom: -24vw; }
   .cut--b { width: 34vw; right: -16vw; top: 12%; }
   .hero-copy { margin-top: 220px; }
-  .hero-copy h1 { font-size: 23px; line-height: 1.4; }
+  .hero-copy h1 { font-size: 23px; line-height: 1.45; }
   .actions .btn--lg { --h: 54px; padding: 0 24px; font-size: 15.5px; }
 
   .folder-tab { font-size: 13.5px; padding: 2px 14px 0; border-radius: 10px 10px 0 0; }
@@ -848,9 +848,9 @@ html.lenis, html.lenis body { height: auto; }
   .folder-tab::after  { right: -10px; border-top-right-radius: 8px; }
   .folder-sheet { border-radius: 22px; }
 
-  .steps-docs { margin-inline: 0; margin-bottom: -30px; gap: 8px; }
-  .doc--step { padding: 4px; border-radius: 10px; }
-  .doc--step img { border-radius: 7px; }
+  .steps-docs { grid-template-columns: 1fr; margin: 18px 6% -36px; }
+  .doc--step:not(:first-child) { display: none; }
+  .doc--step img { aspect-ratio: 16 / 9; }
   .steps { grid-template-columns: 1fr; gap: 10px; }
   .step { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; padding: 16px; border-radius: 20px; }
   .step .bubble { grid-row: span 2; }
