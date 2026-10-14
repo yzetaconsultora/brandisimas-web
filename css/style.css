@@ -244,7 +244,7 @@ html.lenis, html.lenis body { height: auto; }
 
 .hero-stage {
   position: relative;
-  width: 100%; max-width: 1500px; margin-inline: auto;
+  width: 100%;
 }
 
 .slogan {
@@ -252,7 +252,7 @@ html.lenis, html.lenis body { height: auto; }
   text-align: center;
   font-family: var(--display);
   font-weight: 700;
-  font-size: min(9vw, 17svh);
+  font-size: min(8.6vw, 17svh);
   line-height: 0.98;
   letter-spacing: -0.045em;
   color: var(--blanco);
@@ -262,9 +262,11 @@ html.lenis, html.lenis body { height: auto; }
 .slogan-in { display: inline-block; will-change: transform; }
 /* Fotos flotantes en marco blanco */
 .float { position: absolute; z-index: 3; width: var(--w); }
-.float--a { --w: clamp(140px, 12.5vw, 214px); left: -2.5%; top: -6%; }
-.float--b { --w: clamp(150px, 13.5vw, 232px); right: -2.5%; top: 0; }
-.float--c { --w: clamp(140px, 12.5vw, 214px); right: -1.5%; top: 74%; }
+/* Las fotos crecen con la pantalla y se anclan a sus bordes; la consigna
+   ocupa como máximo ~60vw al centro, así nunca se cruzan (zoom 80–150 %). */
+.float--a { --w: clamp(130px, 12vw, 420px); left: -1.5%; top: -4%; }
+.float--b { --w: clamp(140px, 13vw, 450px); right: -1.5%; top: 2%; }
+.float--c { --w: clamp(130px, 12vw, 420px); right: -0.5%; top: 80%; }
 .frame {
   padding: 8px;
   border-radius: 22px;
@@ -564,6 +566,9 @@ main { position: relative; }
    fotos se multiplican para que el blanco desaparezca. */
 .carousel {
   position: relative;
+  width: 100%;
+  margin-inline: auto;
+  max-width: max(560px, calc((100svh - var(--T) - 300px) * 3.4));
   margin-top: clamp(28px, 3.6vw, 56px);
   display: flex;
   align-items: center;
@@ -627,18 +632,20 @@ main { position: relative; }
   color: var(--rosa);
 }
 
-/* Aviso: stock y otros productos */
+/* Aviso: stock y otros productos (burbuja) + botón aparte */
 .stock-ad {
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
-  gap: 14px 24px;
-  max-width: 920px;
-  margin: clamp(22px, 2.6vw, 34px) auto 0;
-  padding: 14px 14px 14px 28px;
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+  gap: 14px 18px;
+  margin-top: clamp(22px, 2.6vw, 34px);
+}
+.stock-bubble {
+  max-width: 720px;
+  padding: 16px 28px;
   border-radius: 999px;
   background: var(--blanco);
   box-shadow: 0 18px 36px -26px rgba(120, 20, 80, 0.5);
+  font-size: 15px; color: var(--texto);
 }
-.stock-ad p { font-size: 15px; color: var(--texto); }
 .stock-ad strong { font-family: var(--display); font-weight: 600; font-size: 16.5px; color: var(--negro); margin-right: 6px; }
 
 /* Carpeta 5: Cotizar */
@@ -794,7 +801,6 @@ main { position: relative; }
   .serv-body { padding-top: 14px; }
   .chips, .serv-lead { margin-top: 10px; }
   .serv-body p:not(.serv-lead) { font-size: 14.5px; margin-bottom: 14px; }
-  .carousel { max-width: calc((100svh - 330px) * 3.2); margin-inline: auto; }
 }
 
 @media (max-width: 1100px) {
@@ -845,12 +851,12 @@ main { position: relative; }
   .slogan { font-size: 10.4vw; letter-spacing: -0.05em; }
   .carousel-track { grid-auto-columns: 100%; }
   .carousel-btn { width: 26px; height: 26px; }
-  .float--a { --w: 29vw; left: 0; top: 112%; }
-  .float--b { --w: 33vw; left: 33.5%; right: auto; top: 124%; }
-  .float--c { --w: 34vw; right: 0; top: 110%; }
+  .float--a { --w: 29vw; left: 0; top: 122%; }
+  .float--b { --w: 33vw; left: 33.5%; right: auto; top: 134%; }
+  .float--c { --w: 34vw; right: 0; top: 120%; }
   .cut--a { width: 60vw; left: -26vw; bottom: -24vw; }
   .cut--b { width: 34vw; right: -16vw; top: 12%; }
-  .hero-copy { margin-top: 220px; }
+  .hero-copy { margin-top: 236px; }
   .hero-copy h1 { font-size: 23px; line-height: 1.45; }
   .actions .btn--lg { --h: 54px; padding: 0 24px; font-size: 15.5px; }
 
@@ -861,7 +867,7 @@ main { position: relative; }
   .folder-sheet { border-radius: 22px; }
 
   .steps-docs { grid-template-columns: 1fr; margin: 18px 6% -36px; }
-  .stock-ad { border-radius: 24px; padding: 18px; }
+  .stock-bubble { border-radius: 24px; padding: 16px 18px; }
   .stock-ad .btn { width: 100%; }
   .doc--step:not(:first-child) { display: none; }
   .steps { grid-template-columns: 1fr; gap: 10px; }
