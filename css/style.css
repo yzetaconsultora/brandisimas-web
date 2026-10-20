@@ -260,26 +260,6 @@ html.lenis, html.lenis body { height: auto; }
 }
 .slogan-line { display: block; white-space: nowrap; overflow: hidden; padding: 0.02em 0 0.1em; margin-bottom: -0.12em; }
 .slogan-in { display: inline-block; will-change: transform; }
-/* Fotos flotantes en marco blanco */
-.float { position: absolute; z-index: 3; width: var(--w); }
-/* Las fotos crecen con la pantalla y se anclan a sus bordes; la consigna
-   ocupa como máximo ~60vw al centro, así nunca se cruzan (zoom 80–150 %). */
-.float--a { --w: clamp(130px, 12vw, 420px); left: -1.5%; top: -4%; }
-.float--b { --w: clamp(140px, 13vw, 450px); right: -1.5%; top: 2%; }
-.float--c { --w: clamp(130px, 12vw, 420px); right: -0.5%; top: 80%; }
-.frame {
-  padding: 8px;
-  border-radius: 22px;
-  background: var(--blanco);
-  box-shadow: 0 30px 60px -26px rgba(110, 10, 70, 0.7), 0 2px 8px rgba(110, 10, 70, 0.12);
-  rotate: var(--r, 0deg);
-}
-.float--a .frame { --r: -4deg; }
-.float--b .frame { --r: 3deg; }
-.float--c .frame { --r: -2.5deg; }
-.frame .ph { border-radius: 15px; }
-.frame img { -webkit-user-drag: none; pointer-events: none; }
-
 .hero-copy {
   position: relative; z-index: 5;
   max-width: 860px;
@@ -800,8 +780,6 @@ main { position: relative; }
 
 /* ---------- Responsive ---------------------------------------------- */
 @media (min-width: 768px) and (max-height: 760px) {
-  .float--a { top: 0; }
-  .float--b { top: 8%; --w: clamp(120px, 10vw, 170px); }
   .serv-body { padding-top: 14px; }
   .chips, .serv-lead { margin-top: 10px; }
   .serv-body p:not(.serv-lead) { font-size: 14.5px; margin-bottom: 14px; }
@@ -851,16 +829,12 @@ main { position: relative; }
   .nav-toggle { width: 40px; height: 40px; }
   .nav-toggle span { left: 12px; right: 12px; }
 
-  .hero { justify-content: flex-start; padding-top: calc(var(--nav-top) + var(--nav-h) + 30px); }
+  .hero { padding-top: calc(var(--nav-top) + var(--nav-h) + 30px); }
   .slogan { font-size: 10.4vw; letter-spacing: -0.05em; }
   .carousel-track { grid-auto-columns: 100%; }
   .carousel-btn { width: 26px; height: 26px; }
-  .float--a { --w: 29vw; left: 0; top: 122%; }
-  .float--b { --w: 33vw; left: 33.5%; right: auto; top: 134%; }
-  .float--c { --w: 34vw; right: 0; top: 120%; }
   .cut--a { width: 60vw; left: -26vw; bottom: -24vw; }
   .cut--b { width: 34vw; right: -16vw; top: 12%; }
-  .hero-copy { margin-top: 236px; }
   .hero-copy h1 { font-size: 23px; line-height: 1.45; }
   .actions .btn--lg { --h: 54px; padding: 0 24px; font-size: 15.5px; }
 
