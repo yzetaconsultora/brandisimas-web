@@ -24,7 +24,7 @@
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 
 <link rel="preload" as="image" href="assets/img/hero-main.webp">
-<link rel="stylesheet" href="css/style.css?v=20261014f">
+<link rel="stylesheet" href="css/style.css?v=20261019a">
 </head>
 <body>
 <!--
@@ -285,7 +285,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           </div>
 
           <div class="quote-sheet">
-            <!-- Sin backend: al enviar se arma el mensaje y se abre WhatsApp -->
+            <!-- Se envía a /api/cotizar (functions/api/cotizar.js), que manda el correo a Brandísimas -->
             <form class="form" id="quoteForm" novalidate>
               <fieldset class="field">
                 <legend class="label">Tipo de evento</legend>
@@ -311,10 +311,15 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
                   <button type="button" class="toggle toggle--sm" data-prod="Bucket hat" aria-pressed="false">Bucket hat</button>
                   <button type="button" class="toggle toggle--sm" data-prod="Vasos" aria-pressed="false">Vasos</button>
                   <button type="button" class="toggle toggle--sm" data-prod="Poleras" aria-pressed="false">Poleras</button>
+                  <button type="button" class="toggle toggle--sm" data-prod="Otros" aria-pressed="false">Otros</button>
                 </div>
               </fieldset>
 
               <label class="field"><span class="label">Cuéntanos más</span><textarea name="mensaje" rows="2" placeholder="Temática, lugar, ideas…"></textarea></label>
+
+              <!-- Trampa para bots: invisible para personas -->
+              <label class="hp" aria-hidden="true">Sitio web<input name="sitio_web" tabindex="-1" autocomplete="off"></label>
+              <div class="captcha" id="quoteCaptcha"></div>
 
               <p class="form-error" id="formError" role="alert" hidden></p>
               <button type="submit" class="btn btn--rosa btn--lg btn--block">
@@ -326,9 +331,8 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
             <div class="done" id="quoteDone" hidden>
               <svg class="done-flor" aria-hidden="true"><use href="#flor"/></svg>
               <h3>¡Gracias, <span id="doneName"></span>!</h3>
-              <p>Abrimos WhatsApp con tu solicitud para <span id="doneSummary"></span>. Envía el mensaje y te contactaremos pronto con una propuesta para tu evento.</p>
+              <p>Recibimos tu solicitud para <span id="doneSummary"></span>. Te contactaremos pronto con una propuesta para tu evento.</p>
               <div class="done-actions">
-                <a class="btn btn--rosa" id="doneWa" href="#" target="_blank" rel="noopener"><span class="btn-label"><span>Abrir WhatsApp de nuevo</span><span aria-hidden="true">Abrir WhatsApp de nuevo</span></span></a>
                 <button type="button" class="btn btn--rosa-line" id="quoteReset"><span class="btn-label"><span>Enviar otra cotización</span><span aria-hidden="true">Enviar otra cotización</span></span></button>
               </div>
             </div>
@@ -402,6 +406,6 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
   <svg aria-hidden="true" focusable="false"><use href="#i-wa"/></svg>
 </a>
 
-<script src="js/main.js?v=20261014d"></script>
+<script src="js/main.js?v=20261019a"></script>
 </body>
 </html>

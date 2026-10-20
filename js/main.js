@@ -258,7 +258,9 @@
     var done        = document.getElementById('quoteDone');
     var doneName    = document.getElementById('doneName');
     var doneSummary = document.getElementById('doneSummary');
-    var doneWa      = document.getElementById('doneWa');
+    var captchaBox  = document.getElementById('quoteCaptcha');
+    var submitBtn   = form.querySelector('button[type="submit"]');
+    var submitTxt   = submitBtn.querySelectorAll('.btn-label > span');
     var resetBtn    = document.getElementById('quoteReset');
     var errorBox    = document.getElementById('formError');
     var orgLabel    = document.getElementById('orgLabel');
@@ -299,6 +301,71 @@
       if (e.target.classList) e.target.classList.remove('is-invalid');
     });
 
+    /* Turnstile: el script de Cloudflare se carga recién cuando el formulario
+       asoma o recibe foco. Modo "interaction-only": solo se ve si hace falta. */
+    var widgetId = null;
+    var token = '';
+    var waiters = [];
+    var flush = function () { waiters.splice(0).forEach(function (fn) { fn(token); }); };
+
+    var loadCaptcha = function () {
+      if (loadCaptcha.done) return;
+      loadCaptcha.done = true;
+      fetch('/api/cotizar', { headers: { accept: 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (cfg) {
+          if (!cfg.sitekey) return;
+          window.onBrandTurnstile = function () {
+            widgetId = window.turnstile.render(captchaBox, {
+              sitekey: cfg.sitekey,
+              appearance: 'interaction-only',
+              'response-field': false,
+              callback: function (t) { token = t; flush(); },
+              'expired-callback': function () { token = ''; },
+              'error-callback': function () { token = ''; flush(); }
+            });
+          };
+          var sc = document.createElement('script');
+          sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onBrandTurnstile';
+          sc.async = true;
+          document.head.appendChild(sc);
+        })
+        .catch(function () { loadCaptcha.done = false; });
+    };
+
+    // Devuelve el token apenas exista; si en 15 s no llega, sigue sin él y el servidor responde el error.
+    var getToken = function () {
+      return new Promise(function (resolve) {
+        if (token) return resolve(token);
+        waiters.push(resolve);
+        setTimeout(flush, 15000);
+      });
+    };
+
+    var resetCaptcha = function () {
+      token = '';
+      if (widgetId !== null && window.turnstile) window.turnstile.reset(widgetId);
+    };
+
+    form.addEventListener('focusin', loadCaptcha);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries, io) {
+        if (entries.some(function (en) { return en.isIntersecting; })) { loadCaptcha(); io.disconnect(); }
+      }, { rootMargin: '400px' }).observe(form);
+    } else {
+      loadCaptcha();
+    }
+
+    var setSending = function (on) {
+      submitBtn.disabled = on;
+      submitTxt.forEach(function (sp) { sp.textContent = on ? 'Enviando…' : 'Enviar cotización'; });
+    };
+
+    var showError = function (msg) {
+      errorBox.textContent = msg;
+      errorBox.hidden = false;
+    };
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       clearErrors();
@@ -321,35 +388,43 @@
         .filter(function (b) { return b.classList.contains('is-on'); })
         .map(function (b) { return b.getAttribute('data-prod'); });
 
-      var fecha = val('fecha');
-      if (fecha) fecha = fecha.split('-').reverse().join('-');
+      f.append('tipo', tipo);
+      prods.forEach(function (p) { f.append('productos', p); });
 
-      var lines = [
-        'Hola Brandísimas! Quiero cotizar el stand para mi evento.',
-        '',
-        '*Tipo de evento:* ' + tipo,
-        '*Nombre:* ' + val('nombre')
-      ];
-      if (val('org'))      lines.push('*' + (emp ? 'Empresa' : 'Tipo de celebración') + ':* ' + val('org'));
-      lines.push('*Email:* ' + val('email'));
-      if (val('telefono')) lines.push('*Teléfono:* ' + val('telefono'));
-      if (fecha)           lines.push('*Fecha del evento:* ' + fecha);
-      lines.push('*Invitados:* ' + val('invitados'));
-      if (prods.length)    lines.push('*Productos:* ' + prods.join(', '));
-      if (val('mensaje'))  lines.push('', val('mensaje'));
-
-      var url = waUrl(lines.join('\n'));
-
-      doneName.textContent = val('nombre').split(' ')[0];
-      doneSummary.textContent =
-        (emp ? 'un evento de empresa' : 'una celebración') +
-        ' (' + val('invitados').toLowerCase() + ' invitados' +
-        (prods.length ? ', ' + prods.join(', ').toLowerCase() : '') + ')';
-      doneWa.href = url;
-
-      form.hidden = true;
-      done.hidden = false;
-      window.open(url, '_blank', 'noopener');
+      loadCaptcha();
+      setSending(true);
+      getToken()
+        .then(function (t) {
+          f.append('cf-turnstile-response', t);
+          return fetch('/api/cotizar', { method: 'POST', body: f, headers: { accept: 'application/json' } });
+        })
+        .then(function (r) {
+          return r.json().catch(function () { return { ok: false }; });
+        })
+        .then(function (res) {
+          setSending(false);
+          if (!res.ok) {
+            resetCaptcha();
+            Object.keys(res.errores || {}).forEach(function (k) {
+              var el = form.elements[k];
+              if (el && el.classList) el.classList.add('is-invalid');
+            });
+            showError(res.mensaje || 'No pudimos enviar tu cotización. Intenta de nuevo o escríbenos por WhatsApp.');
+            return;
+          }
+          doneName.textContent = val('nombre').split(' ')[0];
+          doneSummary.textContent =
+            (emp ? 'un evento de empresa' : 'una celebración') +
+            ' (' + val('invitados').toLowerCase() + ' invitados' +
+            (prods.length ? ', ' + prods.join(', ').toLowerCase() : '') + ')';
+          form.hidden = true;
+          done.hidden = false;
+        })
+        .catch(function () {
+          setSending(false);
+          resetCaptcha();
+          showError('Sin conexión. Revisa tu internet e intenta de nuevo.');
+        });
     });
 
     resetBtn.addEventListener('click', function () {
@@ -357,6 +432,7 @@
       prodBtns.forEach(function (b) { setOn(b, false); });
       setTipo('Celebración');
       clearErrors();
+      resetCaptcha();
       done.hidden = true;
       form.hidden = false;
     });
