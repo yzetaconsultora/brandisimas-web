@@ -499,7 +499,6 @@
 
   /* ---------- Hero ---------------------------------------------------- */
   var slogan = document.querySelector('.slogan');
-  var floats = Array.prototype.slice.call(document.querySelectorAll('.float'));
 
   if (!reduced) {
     // Entrada (el loader se va a los ~1s)
@@ -507,52 +506,16 @@
     intro
       .from('.slogan-in', { yPercent: 115, duration: 1.15, ease: 'expo.out', stagger: 0.09 }, 0)
       .fromTo('.slogan-in', { letterSpacing: '0.06em' }, { letterSpacing: '0em', duration: 1.5, ease: 'expo.out', stagger: 0.09 }, 0.05)
-      .from('.frame', {
-        y: 150, scale: 0.85,
-        rotation: function (i) { return [-6, 5, -4][i]; },
-        duration: 1.35, ease: 'expo.out', stagger: 0.09
-      }, 0.3)
       .from('.hero-copy > *', { y: 34, duration: 1, ease: 'expo.out', stagger: 0.08 }, 0.5);
 
-    // Flote continuo, cada foto a su ritmo
-    document.querySelectorAll('.f-bob').forEach(function (b, i) {
-      gsap.to(b, {
-        y: [12, -14, 10][i], rotation: [1.6, -1.4, 1.2][i],
-        duration: [3.4, 4.1, 3.8][i], ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.4
-      });
-    });
-
-    // Scroll: las fotos se van a distinta velocidad y la consigna se comprime
+    // Scroll: la consigna se comprime
     var heroScroll = gsap.timeline({
       scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.6 }
     });
     heroScroll
       .to(slogan, { yPercent: 22, scale: 0.92, ease: 'none' }, 0)
-      .to(floats[0], { y: -240, rotation: -5, ease: 'none' }, 0)
-      .to(floats[1], { y: -150, rotation: 6, ease: 'none' }, 0)
-      .to(floats[2], { y: -320, rotation: -6, ease: 'none' }, 0)
       .to('.hero-waves', { yPercent: 8, ease: 'none' }, 0)
       .to('.hero-copy', { y: 70, ease: 'none' }, 0);
-
-    // Tilt al pasar el mouse por encima de cada foto (sin parallax)
-    if (fine) {
-      floats.forEach(function (f) {
-        var el = f.querySelector('.f-par');
-        gsap.set(el, { transformPerspective: 800 });
-        var rx = gsap.quickTo(el, 'rotationX', { duration: 0.5, ease: 'power3.out' });
-        var ry = gsap.quickTo(el, 'rotationY', { duration: 0.5, ease: 'power3.out' });
-        f.addEventListener('pointermove', function (e) {
-          var r = f.getBoundingClientRect();
-          var nx = (e.clientX - r.left) / r.width - 0.5;
-          var ny = (e.clientY - r.top) / r.height - 0.5;
-          rx(ny * -16);
-          ry(nx * 18);
-        });
-        f.addEventListener('pointerleave', function () {
-          gsap.to(el, { rotationX: 0, rotationY: 0, duration: 1, ease: 'elastic.out(1, 0.5)', overwrite: 'auto' });
-        });
-      });
-    }
   }
 
   /* ---------- Imán en botones --------------------------------------- */
