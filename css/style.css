@@ -231,6 +231,9 @@ html.lenis, html.lenis body { height: auto; }
 /* Patrón de ondas: blanco sobre rosa, a gran escala, sale por los bordes */
 .hero-waves {
   position: absolute; inset: -12% -8%; z-index: -1;
+}
+.hero-waves::before {
+  content: ""; position: absolute; inset: 0;
   background: var(--blanco);
   -webkit-mask: var(--ondas) center / cover no-repeat;
   mask: var(--ondas) center / cover no-repeat;
@@ -240,6 +243,25 @@ html.lenis, html.lenis body { height: auto; }
 .cut { position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; }
 .cut--a { width: 36vw; aspect-ratio: 1; left: -14vw; bottom: -20vw; background: var(--amarillo); }
 .cut--b { width: 20vw; aspect-ratio: 1; right: -7vw; top: 16%; background: var(--rosa-40); }
+
+/* Fondo vivo: deriva lenta de ondas y círculos. Las ondas se animan en el
+   ::before porque GSAP mueve .hero-waves con el scroll. */
+.hero-waves::before { animation: waves-drift 22s ease-in-out infinite alternate; }
+.cut--a { animation: cut-a 16s ease-in-out infinite alternate; }
+.cut--b { animation: cut-b 19s ease-in-out infinite alternate; }
+@keyframes waves-drift {
+  0%   { translate: 0 0;      rotate: 0deg;    scale: 1;    opacity: 0.12; }
+  50%  { translate: 2.5% -2%; rotate: 1.6deg;  scale: 1.05; opacity: 0.17; }
+  100% { translate: -2% 1.5%; rotate: -1.2deg; scale: 1.08; opacity: 0.13; }
+}
+@keyframes cut-a {
+  from { translate: 0 0;       scale: 1; }
+  to   { translate: 3vw -2.5vw; scale: 1.12; }
+}
+@keyframes cut-b {
+  from { translate: 0 0;      scale: 1; }
+  to   { translate: -2vw 4vw; scale: 0.88; }
+}
 
 .hero-stage {
   position: relative;
@@ -864,6 +886,7 @@ main { position: relative; }
   .loader { animation-duration: 0.01s; animation-delay: 0.2s; }
   .loader-logo { animation: none; }
   .wa-ring { animation: none; }
+  .hero-waves::before, .cut--a, .cut--b { animation: none; }
   .btn-label > span, .doc, .fan-card { transition: none; }
   .carousel-track { scroll-behavior: auto; }
 }
