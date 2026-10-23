@@ -139,25 +139,35 @@
      hasta caber, así nunca se pega por arriba y las pestañas de las
      carpetas anteriores siguen a la vista.                          */
   var canZoom = window.CSS && CSS.supports && CSS.supports('zoom', '1');
+  /* Siempre se mide desde zoom 1: así el resultado depende solo del
+     tamaño de pantalla y no del zoom anterior. Si partiera del zoom
+     previo, el texto se reacomoda distinto en cada pasada y el zoom
+     oscila sin fin (el contenido "rebota" arriba y abajo).          */
   function fitFolder(f, avail) {
     var sheet = f.querySelector('.folder-sheet');
     var kids = Array.prototype.slice.call(sheet.children);
-    var z = parseFloat(sheet.getAttribute('data-z')) || 1;
-    if (!canZoom || window.innerWidth < 1024) {
-      if (z !== 1) { kids.forEach(function (k) { k.style.zoom = ''; }); sheet.removeAttribute('data-z'); }
-      return;
-    }
+    var setZ = function (z) { kids.forEach(function (k) { k.style.zoom = z === 1 ? '' : z; }); };
+    var measure = function () {
+      return kids[kids.length - 1].getBoundingClientRect().bottom - kids[0].getBoundingClientRect().top;
+    };
+    setZ(1);
+    if (!canZoom || window.innerWidth < 1024) { sheet.removeAttribute('data-z'); return; }
     var cs = getComputedStyle(sheet);
-    var pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
-    for (var pass = 0; pass < 3; pass++) {
-      var content = kids[kids.length - 1].getBoundingClientRect().bottom - kids[0].getBoundingClientRect().top;
-      var room = avail - pad - 8;
-      var nz = Math.max(window.innerHeight < 700 ? 0.58 : 0.62, Math.min(1, z * room / content));
-      if (Math.abs(nz - z) < 0.01) break;
-      z = nz;
-      kids.forEach(function (k) { k.style.zoom = z === 1 ? '' : z; });
+    var room = avail - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 8;
+    var minZ = window.innerHeight < 700 ? 0.58 : 0.62;
+    var content = measure();
+    if (content <= room) { sheet.removeAttribute('data-z'); return; }
+    // Búsqueda binaria del zoom más grande que cabe. Las fotos no se
+    // achican en proporción (su alto sale del ancho), por eso se mide.
+    var lo = minZ, hi = 1;
+    for (var pass = 0; pass < 8; pass++) {
+      var mid = (lo + hi) / 2;
+      setZ(mid);
+      if (measure() <= room) lo = mid; else hi = mid;
     }
-    sheet.setAttribute('data-z', z);
+    var best = lo;
+    setZ(best);
+    sheet.setAttribute('data-z', best);
   }
 
   function layoutStack() {
@@ -628,13 +638,19 @@
   }
 
   /* ---------- Recalcular al cambiar tamaños -------------------------- */
-  var relayout = function () { layoutStack(); drawOndas(); ScrollTrigger.refresh(); };
+  var sizes = function () { return folders.map(function (f) { return f.offsetHeight; }).join(','); };
+  var lastSizes = '';
+  var relayout = function () { layoutStack(); drawOndas(); ScrollTrigger.refresh(); lastSizes = sizes(); };
   var rt;
   window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(relayout, 150); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
   window.addEventListener('load', relayout);
   if (window.ResizeObserver) {
-    var ro = new ResizeObserver(function () { clearTimeout(rt); rt = setTimeout(relayout, 150); });
+    // Ignora los cambios que causa el propio relayout (zoom de carpetas).
+    var ro = new ResizeObserver(function () {
+      if (sizes() === lastSizes) return;
+      clearTimeout(rt); rt = setTimeout(relayout, 150);
+    });
     folders.forEach(function (f) { ro.observe(f); });
   }
 })();
