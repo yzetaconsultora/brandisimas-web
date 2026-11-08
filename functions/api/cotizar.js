@@ -17,11 +17,10 @@ var MAIL_TO   = 'info.brandisimas@gmail.com';
 var MAIL_FROM = 'Brandísimas Web <onboarding@resend.dev>';
 var MAX_BYTES = 32 * 1024;
 
+// Formulario v5 (2026-11): tipo, nombre, teléfono y correo. Los demás campos se quitaron.
 var TIPOS     = ['Celebración', 'Empresa'];
-var INVITADOS = ['Menos de 50', '50 a 100', '100 a 200', 'Más de 200'];
-var PRODUCTOS = ['Tote bags', 'Bucket hat', 'Vasos', 'Poleras', 'Otros'];
 var EMAIL_RE  = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-var FECHA_RE  = /^\d{4}-\d{2}-\d{2}$/;
+var FONO_RE   = /^[0-9+()\s.\-]+$/;
 
 function json(data, status) {
   return new Response(JSON.stringify(data), {
@@ -83,39 +82,27 @@ export async function onRequestPost(ctx) {
   if (val('sitio_web')) return json({ ok: true }, 200);
 
   var d = {
-    tipo:      val('tipo'),
-    nombre:    val('nombre', 120),
-    org:       val('org', 160),
-    email:     val('email', 180),
-    telefono:  val('telefono', 40),
-    fecha:     val('fecha', 10),
-    invitados: val('invitados'),
-    productos: form.getAll('productos').filter(function (p) { return PRODUCTOS.indexOf(p) !== -1; }),
-    mensaje:   val('mensaje', 4000)
+    tipo:     val('tipo'),
+    nombre:   val('nombre', 120),
+    telefono: val('telefono', 40),
+    email:    val('email', 180)
   };
 
+  var digitos = d.telefono.replace(/\D/g, '').length;
   var errores = {};
-  if (TIPOS.indexOf(d.tipo) === -1)          errores.tipo = 'Elige el tipo de evento.';
-  if (d.nombre.length < 2)                   errores.nombre = 'Escribe tu nombre.';
-  if (!EMAIL_RE.test(d.email))               errores.email = 'Escribe un email válido.';
-  if (INVITADOS.indexOf(d.invitados) === -1) errores.invitados = 'Elige el número de invitados.';
-  if (d.fecha && !FECHA_RE.test(d.fecha))    errores.fecha = 'Revisa la fecha.';
+  if (TIPOS.indexOf(d.tipo) === -1)                                   errores.tipo = 'Elige el tipo de evento.';
+  if (d.nombre.length < 2)                                            errores.nombre = 'Escribe tu nombre.';
+  if (!FONO_RE.test(d.telefono) || digitos < 8 || digitos > 15)      errores.telefono = 'Escribe un teléfono válido.';
+  if (!EMAIL_RE.test(d.email))                                        errores.email = 'Escribe un correo válido.';
   if (Object.keys(errores).length) {
     return json({ ok: false, errores: errores, mensaje: 'Revisa los campos marcados.' }, 400);
   }
 
-  var emp = d.tipo === 'Empresa';
-  var o = function (v) { return v || '—'; };
   var texto = [
     'Tipo de evento: ' + d.tipo,
     'Nombre: ' + d.nombre,
-    (emp ? 'Empresa: ' : 'Tipo de celebración: ') + o(d.org),
-    'Email: ' + d.email,
-    'Teléfono: ' + o(d.telefono),
-    'Fecha: ' + o(d.fecha && d.fecha.split('-').reverse().join('-')),
-    'Invitados: ' + d.invitados,
-    'Qué productos interesan: ' + o(d.productos.join(', ')),
-    'Más información: ' + o(d.mensaje)
+    'Teléfono: ' + d.telefono,
+    'Email: ' + d.email
   ].join('\n');
 
   var res;
