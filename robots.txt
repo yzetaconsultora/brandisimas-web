@@ -1,0 +1,23 @@
+# Cloudflare antepone su bloque "Managed robots.txt" (User-agent: * Allow: /
+# y bloqueo de rastreadores que entrenan IA). Este archivo no lo contradice:
+# solo agrega los buscadores de IA que citan el sitio y la ubicación del sitemap.
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+Sitemap: https://brandisimas.cl/sitemap.xml
