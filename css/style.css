@@ -113,7 +113,7 @@ main { display: block; }
 }
 .nav.scrolled { box-shadow: 0 10px 30px -24px rgba(180,80,120,.55); }
 .nav-logo { display: flex; justify-self: start; }
-.logo-img { height: 64px; width: auto; margin: -8px -14px; }
+.logo-img { height: 64px; width: auto; max-width: none; flex: none; margin: -8px -14px; }
 .nav-links {
   display: flex; justify-content: center; gap: clamp(14px, 2.4vw, 32px);
   font-size: 14px; font-weight: 600;
@@ -420,6 +420,13 @@ main { display: block; }
   .svc { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
   .svc-ph, .svc { min-height: 300px; }
   .footer-logo { margin: -18px -20px; }
+}
+
+@media (max-width: 400px) {
+  .nav { gap: 8px; }
+  .logo-img { height: 46px; margin: -5px -10px; }
+  .nav-cta { padding: 9px 14px; font-size: 12.5px; }
+  .nav-cta span { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
