@@ -1,0 +1,9 @@
+{
+  "name": "brandisimas-mailer",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  // Sin URL pública: solo se llama desde la function de Pages (service binding MAILER).
+  "workers_dev": false,
+  "preview_urls": false,
+  "send_email": [{ "name": "MAIL", "destination_address": "info.brandisimas@gmail.com" }]
+}

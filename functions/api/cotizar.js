@@ -3,13 +3,19 @@
  *
  * GET  /api/cotizar  entrega la sitekey pública de Turnstile (así el HTML no
  *                    cambia cuando se rota el widget).
- * POST /api/cotizar  verifica Turnstile, valida y envía el correo vía Resend.
+ * POST /api/cotizar  verifica Turnstile, valida y envía el correo.
  *
- * Variables de entorno (Cloudflare Pages → Settings → Variables and Secrets):
+ * Envío del correo, en este orden (igual que dalecreativa.cl):
+ *   1. MAILER: Worker `brandisimas-mailer` (Cloudflare Email Routing, carpeta mailer/),
+ *      envía desde web@brandisimas.cl a info.brandisimas@gmail.com.
+ *   2. RESEND_API_KEY: Resend, solo como respaldo si el Worker falla.
+ *
+ * Variables (Cloudflare Pages → Settings → Variables and Secrets):
  *   TURNSTILE_SITEKEY  pública
  *   TURNSTILE_SECRET   secreta
- *   RESEND_API_KEY     secreta
- *   MAIL_FROM          opcional; por defecto el remitente de prueba de Resend
+ *   MAILER             service binding al Worker brandisimas-mailer
+ *   RESEND_API_KEY     secreta, opcional (respaldo)
+ *   MAIL_FROM          opcional; remitente de Resend
  *   MAIL_TO            opcional; por defecto info.brandisimas@gmail.com
  */
 
@@ -42,6 +48,43 @@ async function turnstileOk(token, secret, ip) {
   return data.success === true;
 }
 
+async function enviarConMailer(env, correo) {
+  if (!env.MAILER) return false;
+  try {
+    var res = await env.MAILER.fetch('https://mailer.internal/send', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(correo)
+    });
+    if (!res.ok) console.error('Mailer', res.status, await res.text());
+    return res.ok;
+  } catch (e) {
+    console.error('Mailer', e && e.message);
+    return false;
+  }
+}
+
+async function enviarConResend(env, correo) {
+  if (!env.RESEND_API_KEY) return false;
+  try {
+    var res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'authorization': 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        from: env.MAIL_FROM || MAIL_FROM,
+        to: [correo.to],
+        reply_to: correo.replyTo,
+        subject: correo.subject,
+        text: correo.text
+      })
+    });
+    if (!res.ok) console.error('Resend', res.status, await res.text());
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
 export async function onRequestGet(ctx) {
   var sitekey = ctx.env.TURNSTILE_SITEKEY;
   if (!sitekey) return json({ ok: false }, 503);
@@ -64,7 +107,7 @@ export async function onRequestPost(ctx) {
   if (largo > MAX_BYTES) return json({ ok: false, mensaje: 'El mensaje es demasiado largo.' }, 413);
 
   // Sin secretos se falla cerrado a propósito.
-  if (!env.TURNSTILE_SECRET || !env.RESEND_API_KEY) return json({ ok: false, mensaje: falla }, 503);
+  if (!env.TURNSTILE_SECRET || (!env.MAILER && !env.RESEND_API_KEY)) return json({ ok: false, mensaje: falla }, 503);
 
   var form;
   try { form = await request.formData(); }
@@ -107,26 +150,16 @@ export async function onRequestPost(ctx) {
     'Email: ' + d.email
   ].join('\n');
 
-  var res;
-  try {
-    res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'authorization': 'Bearer ' + env.RESEND_API_KEY, 'content-type': 'application/json' },
-      body: JSON.stringify({
-        from: env.MAIL_FROM || MAIL_FROM,
-        to: [env.MAIL_TO || MAIL_TO],
-        reply_to: d.email,
-        subject: 'Nueva cotización: ' + d.nombre + ' (' + d.tipo + ')',
-        text: texto
-      })
-    });
-  } catch (e) {
-    return json({ ok: false, mensaje: falla }, 502);
-  }
-  if (!res.ok) {
-    console.error('Resend', res.status, await res.text());
-    return json({ ok: false, mensaje: falla }, 502);
-  }
+  var correo = {
+    to: env.MAIL_TO || MAIL_TO,
+    replyTo: d.email,
+    replyName: d.nombre,
+    subject: 'Nueva cotización: ' + d.nombre + ' (' + d.tipo + ')',
+    text: texto
+  };
+
+  var enviado = (await enviarConMailer(env, correo)) || (await enviarConResend(env, correo));
+  if (!enviado) return json({ ok: false, mensaje: falla }, 502);
 
   return json({ ok: true }, 200);
 }
