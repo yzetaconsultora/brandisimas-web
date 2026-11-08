@@ -14,6 +14,8 @@
  */
 
 var MAIL_TO   = 'info.brandisimas@gmail.com';
+// Dirección pública que ve el visitante (Cloudflare Email Routing la reenvía a MAIL_TO).
+var CONTACTO  = 'hola@brandisimas.cl';
 var MAIL_FROM = 'Brandísimas Web <onboarding@resend.dev>';
 var MAX_BYTES = 32 * 1024;
 
@@ -50,7 +52,7 @@ export async function onRequestPost(ctx) {
   var request = ctx.request;
   var env = ctx.env;
   var ip = request.headers.get('CF-Connecting-IP');
-  var falla = 'No pudimos enviar tu cotización. Escríbenos a ' + (env.MAIL_TO || MAIL_TO) + ' o por WhatsApp.';
+  var falla = 'No pudimos enviar tu cotización. Escríbenos a ' + CONTACTO + ' o por WhatsApp.';
 
   // El formulario es propio: un POST desde otro origen no tiene nada que hacer acá.
   var desde = request.headers.get('origin');
