@@ -95,6 +95,9 @@ main { display: block; }
 .btn--soft { background: #FFE3F1; color: var(--ink); }
 .btn--soft:hover { background: var(--pink); color: #fff; }
 .btn:disabled { opacity: .7; cursor: progress; }
+/* Flecha ↗ en SVG: el carácter U+2197 sale como emoji en iOS */
+.ico-ne { display: inline-block; width: 1em; height: 1em; flex: none; vertical-align: -.12em; }
+.link-line .ico-ne { width: .95em; height: .95em; }
 
 .link-line { font-size: 16px; font-weight: 600; border-bottom: 1.5px solid var(--ink); padding-bottom: 3px; }
 .link-line--sm { font-size: 14px; font-weight: 700; padding-bottom: 2px; align-self: flex-start; }
@@ -426,7 +429,52 @@ main { display: block; }
   .nav { gap: 8px; }
   .logo-img { height: 46px; margin: -5px -10px; }
   .nav-cta { padding: 9px 14px; font-size: 12.5px; }
-  .nav-cta span { display: none; }
+  .nav-cta .ico-ne { display: none; }
+}
+
+/* ---------- Móvil angosto ----------
+   Android con letra del sistema agrandada (Xiaomi la trae así) aplica zoom de página:
+   un teléfono de 393 px queda en ~300–340 px CSS. Todo debe aguantar hasta 280 px. */
+@media (max-width: 760px) {
+  .br-desk { display: none; }
+  .h2, .h2--xl { text-wrap: balance; }
+
+  /* Hero */
+  .eyebrow-line { width: auto; }
+  .eyebrow-line span { white-space: normal; letter-spacing: .2em; line-height: 1.6; text-wrap: balance; }
+  .eyebrow-line i { display: none; }
+  .hero-title { gap: 6px; }
+  .hero-l1 { font-size: clamp(26px, 8.2vw, 38px); line-height: 1.1; }
+  .hero-l2 { font-size: clamp(34px, 11.4vw, 56px); line-height: 1.04; }
+  /* Callouts al lado de su ícono, no encima */
+  .hero-art { padding-top: clamp(56px, 16vw, 80px); }
+  .hero-ico { width: clamp(56px, 15vw, 76px); }
+  .callout--a { left: calc(clamp(56px, 15vw, 76px) + 4px); top: 2%; }
+  .callout--b { right: calc(clamp(56px, 15vw, 76px) + 4px); bottom: 1%; }
+
+  /* Cotizar */
+  .toggles { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  .toggle { padding: 12px 14px; }
+}
+
+@media (max-width: 560px) {
+  /* Servicios: foto arriba y texto abajo; lado a lado no cabe el título */
+  .svc, .svc-ph { min-height: 0; }
+  .svc { grid-template-columns: minmax(0, 1fr); }
+  .svc-ph { order: -1; aspect-ratio: 16 / 10; }
+  .svc-body { padding: 22px 22px 26px; }
+  .svc h3 { font-size: 24px; }
+
+  .quote { padding: 26px 22px; border-radius: 24px; }
+  .footer-logo { margin: -18px -12px; }
+}
+
+@media (max-width: 350px) {
+  :root { --pad: 16px; }
+  .nav-cta .cta-ext { display: none; }
+  .logo-img { height: 42px; margin: -5px -9px; }
+  .products { gap: 20px 10px; }
+  .products span { font-size: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
